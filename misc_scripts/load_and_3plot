@@ -1,0 +1,153 @@
+#!/usr/bin/octave
+clear all;
+
+theta_min  =   0.0;
+theta_max  =  55.0;
+theta_step =    1.0;
+phi_min    =    0.0;
+phi_max    =  358.0;
+phi_step   =    2.0;
+
+ntheta = (theta_max-theta_min)/theta_step +1;
+theta  = linspace(theta_min,theta_max,ntheta);
+nphi   = (phi_max-phi_min)/phi_step+1;
+phi    = linspace(phi_min,phi_max,nphi);
+
+% Loop through file and find the longest ray
+fid=fopen('raypaths.dat');
+tline = fgetl(fid);
+iphi   = 1;
+itheta = 1;
+it = 0;
+tmax = 0;
+nrays=0;
+while 1
+  tline = fgetl(fid);
+  check=min(size(tline));
+  if ~ischar(tline), break, end
+  if check == 1
+    A = sscanf(tline,'%f %f %f %f %f %f');
+    it = it + 1;
+    if it > tmax
+      tmax = it;
+    end
+  else
+    % If the line has no length, then reset 'it' to start a new ray
+    nrays=nrays+1;
+    it = 0;
+  end
+end
+fclose(fid);
+
+%Initialize arrays and loop back through the file
+x = NaN([tmax ntheta nphi]);
+y = NaN([tmax ntheta nphi]);
+z = NaN([tmax ntheta nphi]);
+t = NaN([tmax ntheta nphi]);
+fid=fopen('raypaths.dat');
+tline = fgetl(fid);
+iphi   = 1;
+itheta = 1;
+it     = 1;
+nrays=0;
+while 1
+  tline = fgetl(fid);
+  check=min(size(tline));
+  if ~ischar(tline), break, end
+  if check == 1
+    A = sscanf(tline,'%f %f %f %f %f %f');
+    z(it,itheta,iphi) = A(1);
+    y(it,itheta,iphi) = A(2);
+    x(it,itheta,iphi) = A(3);
+    t(it,itheta,iphi) = A(6);
+    it = it + 1;
+  else
+    % If the line has no length, then reset 'it' to start a new ray
+    nrays=nrays+1;
+    itheta=itheta+1;
+    it = 1;
+    if itheta > ntheta
+      itheta = 1;
+      iphi = iphi + 1;
+    end
+  end
+  %disp(tline);
+end
+fclose(fid);
+
+zbounce = 1.0;
+nb = 0;
+for ip = 1:nphi
+  for it = 1:ntheta
+    smax = max(size(z(:,it,ip)));
+    for is = 1:smax
+      if z(is,it,ip)<=zbounce
+        nb = nb+1;
+        xb(nb) = x(is,it,ip);
+        yb(nb) = y(is,it,ip);
+        tb(nb) = t(is,it,ip);
+      end
+    end
+  end
+end
+zb = xb*0.0 + zbounce;
+
+
+Clevx=-169.945;
+Dilx= -158.4575;
+Okmx= -168.175;
+SndPtx=-160.49;
+Aktx=-165.99;
+Adkx=-176.6581;
+
+% Dillingham plot
+clf;
+hold on;
+nplotphi   = nphi;
+nplottheta = ntheta;
+ip=22; % to DLL (Az=42.0 )
+for it = 1:nplottheta
+  plot(x(:,it,ip),z(:,it,ip),'k-')
+end
+axis([-177.0,-158,0,180])
+plot(Clevx,0.0,'r^','MarkerSize',10,'MarkerFaceColor','r');
+plot(Dilx,0.0,'gs','MarkerSize',10,'MarkerFaceColor','g')
+ylabel('Altitude (km)')
+titlestr=sprintf('Clev. to Dillingham; Azimuth = %0.1f',phi(ip));
+title(titlestr);
+hold off
+print "-S750,250" -dpng DLL.png
+
+% Sand Point plot
+clf;
+hold on;
+ip=32; % to SandPoint (Az=64.0)
+for it = 1:nplottheta
+  plot(x(:,it,ip),z(:,it,ip),'k-')
+end
+axis([-177.0,-158,0,180])
+plot(Clevx,0.0,'r^','MarkerSize',10,'MarkerFaceColor','r');
+plot(Okmx,0.0,'gs','MarkerSize',10,'MarkerFaceColor','g')
+plot(Aktx,0.0,'gs','MarkerSize',10,'MarkerFaceColor','g')
+plot(SndPtx,0.0,'gs','MarkerSize',10,'MarkerFaceColor','g')
+ylabel('Altitude (km)')
+titlestr=sprintf('Clev. to Sand Point; Azimuth = %0.1f',phi(ip));
+title(titlestr);
+hold off
+print "-S750,250" -dpng SnP.png
+
+% Adak plot
+clf;
+hold on;
+ip=131;  % to Adak (Ax=260.0)
+for it = 1:nplottheta
+  plot(x(:,it,ip),z(:,it,ip),'k-')
+end
+axis([-177.0,-158,0,180])
+plot(Clevx,0.0,'r^','MarkerSize',10,'MarkerFaceColor','r');
+plot(Adkx,0.0,'gs','MarkerSize',10,'MarkerFaceColor','g')
+ylabel('Altitude (km)')
+titlestr=sprintf('Clev. to Adak; Azimuth = %0.1f',phi(ip));
+title(titlestr);
+hold off
+print "-S750,250" -dpng Adk.png
