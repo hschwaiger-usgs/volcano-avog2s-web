@@ -118,9 +118,7 @@ ylabel('Tloss (Db)');
 hold off;
 
 outfilename=sprintf('%s_%s_Az%0.1f_%.2fHz_%i%s%s%sZ.png',srcname{1},NMeth,az1,freq,yyyy,MM,DD,HH);
-
 print(outfilename,'-dpng')
-%print "-S750,250" -dpng DLL.png
 print -dpng temp.png
 
 

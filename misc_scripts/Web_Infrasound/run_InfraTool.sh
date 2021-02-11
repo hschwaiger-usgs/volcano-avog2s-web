@@ -191,17 +191,17 @@ if [[ "$MODELID" -eq 4 ]]  ; then    ## Model  4:  GeoAcGlobal.RngDep (sweep)
 fi
 if [[ "$MODELID" -eq 5 ]]  ; then    ## Model  5:  Modess (strat.)    (profile)
   ${EXEC} --atmosfile Volc0.met --skiplines 0 --atmosfileorder ztuvdp --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --write_2D_TLoss
-  ln -s ../plot_tloss2d.m plot_tloss2d
+  ln -s ${WRK}/plot_tloss2d.m plot_tloss2d
   ./plot_tloss2d
 fi
 if [[ "$MODELID" -eq 6 ]]  ; then    ## Model  6:  CModess (stra.)    (profile)
   ${EXEC} --atmosfile Volc0.met --skiplines 0 --atmosfileorder ztuvdp --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --write_2D_TLoss
-  ln -s ../plot_tloss2d.m plot_tloss2d
+  ln -s ${WRK}/plot_tloss2d.m plot_tloss2d
   ./plot_tloss2d
 fi
 if [[ "$MODELID" -eq 7 ]]  ; then    ## Model  7:  WMod (stra.)       (profile)
   ${EXEC} --atmosfile Volc0.met --skiplines 0 --atmosfileorder ztuvdp --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --write_2D_TLoss
-  ln -s ../plot_tloss2d.m plot_tloss2d
+  ln -s ${WRK}/plot_tloss2d.m plot_tloss2d
   ./plot_tloss2d
 fi
 if [[ "$MODELID" -eq 8 ]]  ; then    ## Model  8:  ModBB              (profile)
@@ -210,17 +210,17 @@ if [[ "$MODELID" -eq 8 ]]  ; then    ## Model  8:  ModBB              (profile)
 fi
 if [[ "$MODELID" -eq 9 ]]  ; then    ## Model  9:  ModessRD1WCM       (profile)
   ${EXEC} --g2senvfile InfraAtmos01.env --atmosfileorder zuvwtdp --skiplines 0 --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --receiverheight_km 0 --maxheight_km 180 --maxrange_km 1000 --write_2D_TLoss
-  ln -s ../plot_tloss2d.m plot_tloss2d
+  ln -s ${WRK}/plot_tloss2d.m plot_tloss2d
   ./plot_tloss2d
 fi
 if [[ "$MODELID" -eq 10 ]] ; then    ## Model 10:  pape               (profile)
   ${EXEC} --g2senvfile InfraAtmos01.env --atmosfileorder zuvwtdp --skiplines 0 --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --receiverheight_km 0 --maxheight_km 180 --starter_type gaussian --n_pade 6 --maxrange_km 1000 --write_2D_TLoss --do_lossless
-  ln -s ../plot_tloss2d.m plot_tloss2d
+  ln -s ${WRK}/plot_tloss2d.m plot_tloss2d
   ./plot_tloss2d
 fi
 if [[ "$MODELID" -eq 11 ]] ; then    ## Model 11:  Modess             (sweep)
   ${EXEC} --atmosfile Volc0.met --atmosfileorder ztuvdp --skiplines 0 --freq ${FREQ} --Nby2Dprop --azimuth_start 0 --azimuth_end 360 --azimuth_step 1 --write_2D_TLoss --sourceheight_km ${SRCZ}
-  ln -s ../plot_Nby2D_tloss.py temp.py
+  ln -s ${WRK}/plot_Nby2D_tloss.py temp.py
   python temp.py
   rm ${TMP}/Nby2D_tloss_1d.lossless.nm
 fi

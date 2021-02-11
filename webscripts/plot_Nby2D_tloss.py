@@ -208,7 +208,7 @@ cbar.set_label('Transmission loss (dB)')
 ax.set_aspect('auto', adjustable=None)
 
 # Save the plot by calling plt.savefig() BEFORE plt.show()
-ofileroot='%s_Ev_tloss2d_%s%s%s_%sZ_fr%.1f' % (Volcano,YYYY,MM,DD,HH,freq)
+ofileroot='%s_tloss2d_%s%s%s_%sZ_fr%.1f' % (Volcano,YYYY,MM,DD,HH,freq)
 ofilepng='%s.png' % (ofileroot)
 plt.savefig(ofilepng)
 plt.savefig('temp.png')

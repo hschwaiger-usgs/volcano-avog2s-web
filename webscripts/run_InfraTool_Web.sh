@@ -3,11 +3,12 @@
 
 WRK=/home/ash3d/G2S_today
 AVOG2S=/opt/USGS/AVOG2S
-ART2DDIR=/home/ash3d/Programs/ART2D/bin
-GEOACDIR=/home/ash3d/Programs/GIT/GeoAc
-NCPADIR=/home/ash3d/Programs/GIT/ncpaprop/bin
+ART2DDIR=${AVOG2S}/ExternalPrograms/ART2D
+GEOACDIR=${AVOG2S}/ExternalPrograms/GeoAc
+NCPADIR=${AVOG2S}/ExternalPrograms/ncpaprop/bin
 PYDIR=/home/ash3d/anaconda3/bin
 TOPO=/opt/Ash3d/data/topo/etopo.nc
+DATA=/data/WindFiles/AVOG2S
 
 #WRK=/media/hschwaiger/6249f4be-4861-4a90-95ea-743a7e0a0579/Infrasound/BV_runs/Autoplotting/
 #AVOG2S=/opt/USGS/AVOG2S
@@ -197,7 +198,7 @@ echo "${SRCNAME}" > srcname.dat
 echo "${LONPMIN}" > lonpmin.dat
 echo "${LATPMIN}" > latpmin.dat
 
-ln -s ${WRK}/RAW_SH/G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_*_res.raw .
+ln -s ${DATA}/RAW_SH/G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_*_res.raw .
 
 if [[ "$DIM" -eq 1 ]] ; then
   echo "${SRCX} ${SRCY}"                                  > temp.ctr
@@ -254,27 +255,36 @@ if [[ "$MODELID" -eq 1 ]]  ; then    ## Model  1:  Art2d              (profile)
   echo " Art2d not implemented"
 fi
 if [[ "$MODELID" -eq 2 ]]  ; then    ## Model  2:  GeoAcGlobal        (profile)                                       -180->180
+  echo "CALLING:   ${EXEC} -prop Volc0.met theta_min=-30.0 theta_max=55.0 theta_step=1.0 azimuth=${AZ1} bounces=10 lat_src=${SRCY} lon_src=${SRCX} z_src=${SRCZ} CalcAmp=False WriteAtmo=True"
   ${EXEC} -prop Volc0.met theta_min=-30.0 theta_max=55.0 theta_step=1.0 azimuth=${AZ1} bounces=10 lat_src=${SRCY} lon_src=${SRCX} z_src=${SRCZ} CalcAmp=False WriteAtmo=True
 fi
 if [[ "$MODELID" -eq 3 ]]  ; then    ## Model  3:  GeoAcGlobal.RngDep (profile)
+  echo "CALLING:   ${EXEC} -prop Volc Volc.loclat Volc.loclon theta_min=0.0 theta_max=55.0 theta_step=1.0 azimuth=${AZ1} bounces=10 lat_src=${SRCY} lon_src=${SRCX} z_src=${SRCZ} CalcAmp=False WriteAtmo=True"
   ${EXEC} -prop Volc Volc.loclat Volc.loclon theta_min=0.0 theta_max=55.0 theta_step=1.0 azimuth=${AZ1} bounces=10 lat_src=${SRCY} lon_src=${SRCX} z_src=${SRCZ} CalcAmp=False WriteAtmo=True
 fi
 if [[ "$MODELID" -eq 4 ]]  ; then    ## Model  4:  GeoAcGlobal.RngDep (sweep)
+  echo "CALLING:  ${EXEC} -prop Volc Volc.loclat Volc.loclon theta_min=-30.0 theta_max=55.0 theta_step=1.0 phi_min=${AZ1} phi_max=${AZ2} phi_step=${DAZ} bounces=10 lat_src=${SRCY} lon_src=${SRCX} z_src=${SRCZ} CalcAmp=False WriteAtmo=True"
   ${EXEC} -prop Volc Volc.loclat Volc.loclon theta_min=-30.0 theta_max=55.0 theta_step=1.0 phi_min=${AZ1} phi_max=${AZ2} phi_step=${DAZ} bounces=10 lat_src=${SRCY} lon_src=${SRCX} z_src=${SRCZ} CalcAmp=False WriteAtmo=True
 fi
 if [[ "$MODELID" -eq 5 ]]  ; then    ## Model  5:  Modess (strat.)    (profile)
+  echo "CALLING:   ${EXEC} --atmosfile Volc0.met --skiplines 0 --atmosfileorder ztuvdp --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --write_2D_TLoss"
   ${EXEC} --atmosfile Volc0.met --skiplines 0 --atmosfileorder ztuvdp --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --write_2D_TLoss
   ln -s ${AVOG2S}/bin/webscripts/plot_tloss2d.m plot_tloss2d
+  echo "CALLING:   ./plot_tloss2d"
   ./plot_tloss2d
 fi
 if [[ "$MODELID" -eq 6 ]]  ; then    ## Model  6:  CModess (stra.)    (profile)
+  echo "CALLING:   ${EXEC} --atmosfile Volc0.met --skiplines 0 --atmosfileorder ztuvdp --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --write_2D_TLoss"
   ${EXEC} --atmosfile Volc0.met --skiplines 0 --atmosfileorder ztuvdp --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --write_2D_TLoss
+  echo "CALLING:  ./plot_tloss2d"
   ln -s ${AVOG2S}/bin/webscripts/plot_tloss2d.m plot_tloss2d
   ./plot_tloss2d
 fi
 if [[ "$MODELID" -eq 7 ]]  ; then    ## Model  7:  WMod (stra.)       (profile)
+  echo "CALLING:   ${EXEC} --atmosfile Volc0.met --skiplines 0 --atmosfileorder ztuvdp --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --write_2D_TLoss"
   ${EXEC} --atmosfile Volc0.met --skiplines 0 --atmosfileorder ztuvdp --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --write_2D_TLoss
   ln -s ${AVOG2S}/bin/webscripts/plot_tloss2d.m plot_tloss2d
+  echo "CALLING:  ./plot_tloss2d"
   ./plot_tloss2d
 fi
 if [[ "$MODELID" -eq 8 ]]  ; then    ## Model  8:  ModBB              (profile)
@@ -282,18 +292,24 @@ if [[ "$MODELID" -eq 8 ]]  ; then    ## Model  8:  ModBB              (profile)
   exit
 fi
 if [[ "$MODELID" -eq 9 ]]  ; then    ## Model  9:  ModessRD1WCM       (profile)
+  echo "CALLING:  ${EXEC} --g2senvfile InfraAtmos01.env --atmosfileorder zuvwtdp --skiplines 0 --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --receiverheight_km 0 --maxheight_km 180 --maxrange_km 1000 --write_2D_TLoss"
   ${EXEC} --g2senvfile InfraAtmos01.env --atmosfileorder zuvwtdp --skiplines 0 --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --receiverheight_km 0 --maxheight_km 180 --maxrange_km 1000 --write_2D_TLoss
   ln -s ${AVOG2S}/bin/webscripts/plot_tloss2d.m plot_tloss2d
+  echo "CALLING:  ./plot_tloss2d"
   ./plot_tloss2d
 fi
 if [[ "$MODELID" -eq 10 ]] ; then    ## Model 10:  pape               (profile)
+  echo "CALLING:  ${EXEC} --g2senvfile InfraAtmos01.env --atmosfileorder zuvwtdp --skiplines 0 --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --receiverheight_km 0 --maxheight_km 180 --starter_type gaussian --n_pade 6 --maxrange_km 1000 --write_2D_TLoss --do_lossless"
   ${EXEC} --g2senvfile InfraAtmos01.env --atmosfileorder zuvwtdp --skiplines 0 --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --receiverheight_km 0 --maxheight_km 180 --starter_type gaussian --n_pade 6 --maxrange_km 1000 --write_2D_TLoss --do_lossless
   ln -s ${AVOG2S}/bin/webscripts/plot_tloss2d.m plot_tloss2d
+  echo "CALLING:  ./plot_tloss2d"
   ./plot_tloss2d
 fi
 if [[ "$MODELID" -eq 11 ]] ; then    ## Model 11:  Modess             (sweep)
+  echo "CALLING:  ${EXEC} --atmosfile Volc0.met --atmosfileorder ztuvdp --skiplines 0 --freq ${FREQ} --Nby2Dprop --azimuth_start 0 --azimuth_end 360 --azimuth_step 1 --write_2D_TLoss --sourceheight_km ${SRCZ}"
   ${EXEC} --atmosfile Volc0.met --atmosfileorder ztuvdp --skiplines 0 --freq ${FREQ} --Nby2Dprop --azimuth_start 0 --azimuth_end 360 --azimuth_step 1 --write_2D_TLoss --sourceheight_km ${SRCZ}
   ln -s ${AVOG2S}/bin/webscripts/plot_Nby2D_tloss.py temp.py
+  echo "CALLING:   python temp.py"
   python temp.py
 fi
 
