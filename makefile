@@ -156,43 +156,18 @@ clean:
 	rm -rf misc_scripts/getAzRng
 
 install:
-	install -d $(INSTALLDIR)/bin/webscripts/              $(INSTALLDIR)/wrk
-	install -m 755 ../bin/citywriter                       $(INSTALLDIR)/bin/
-	install -m 755 ../bin/convert_to_decimal               $(INSTALLDIR)/bin/
-#	install -m 755 ../bin/legend_placer_ac                 $(INSTALLDIR)/bin/
-#	install -m 755 ../bin/legend_placer_ac_traj            $(INSTALLDIR)/bin/
-#	install -m 755 ../bin/legend_placer_dp                 $(INSTALLDIR)/bin/
-#	install -m 755 ../bin/legend_placer_dp_mm              $(INSTALLDIR)/bin/
-#	install -m 755 ../bin/makeAsh3dinput1_ac               $(INSTALLDIR)/bin/
-#	install -m 755 ../bin/makeAsh3dinput1_dp               $(INSTALLDIR)/bin/
-#	install -m 755 ../bin/makeAsh3dinput2_ac               $(INSTALLDIR)/bin/
-#	install -m 755 ../bin/makeAsh3dinput2_dp               $(INSTALLDIR)/bin/
-#	install -m 755 ../bin/makeAshArrivalTimes_ac           $(INSTALLDIR)/bin/
-#	install -m 755 ../bin/makeAshArrivalTimes_dp           $(INSTALLDIR)/bin/
-#	install -m 755 ../bin/ncGFS4_2_pf                      $(INSTALLDIR)/bin/
-#	install -m 755 ../scripts/GFSVolc_to_gif_ac_hysplit.sh $(INSTALLDIR)/bin/scripts/
-#	install -m 755 ../scripts/GFSVolc_to_gif_ac_puff.sh    $(INSTALLDIR)/bin/scripts/
-#	install -m 755 ../scripts/GFSVolc_to_gif_ac_traj.sh    $(INSTALLDIR)/bin/scripts/
-#	install -m 755 ../scripts/GFSVolc_to_gif_dp_mm.sh      $(INSTALLDIR)/bin/scripts/
-#	install -m 755 ../scripts/GFSVolc_to_gif_dp.sh         $(INSTALLDIR)/bin/scripts/
-#	install -m 755 ../scripts/GFSVolc_to_gif_tvar.sh       $(INSTALLDIR)/bin/scripts/
-#	install -m 755 ../scripts/GMT_Ash3d_to_gif.sh          $(INSTALLDIR)/bin/scripts/
-#	install -m 755 ../scripts/gmt_test.sh                  $(INSTALLDIR)/bin/scripts/
-#	install -m 755 ../scripts/killrun.sh                   $(INSTALLDIR)/bin/scripts/
-#	install -m 755 ../scripts/runAsh3d_ac.sh               $(INSTALLDIR)/bin/scripts/
-#	install -m 755 ../scripts/runAsh3d_dp.sh               $(INSTALLDIR)/bin/scripts/
-#	install -m 755 ../scripts/runAsh3d.sh                  $(INSTALLDIR)/bin/scripts/
-#	install -m 755 ../scripts/runGFS_puff.sh               $(INSTALLDIR)/bin/scripts/
-#	install -m 755 ../scripts/runGFS_traj.sh               $(INSTALLDIR)/bin/scripts/
-#	install -m 755 ../scripts/xyz2shp.py                   $(INSTALLDIR)/bin/scripts/
-#	install -m 644 ../share/GlobalAirports_ewert.txt   $(INSTALLDIR)/share/
-#	install -m 644 ../share/readme.pdf                 $(INSTALLDIR)/share/
-#	install -m 644 ../share/post_proc/*cpt             $(INSTALLDIR)/share/post_proc/
-#	install -m 644 ../share/post_proc/*png             $(INSTALLDIR)/share/post_proc/
-#	install -m 644 ../share/post_proc/*xy              $(INSTALLDIR)/share/post_proc/
-#	install -m 644 ../share/post_proc/world_cities.txt $(INSTALLDIR)/share/post_proc/
-#	install -m 755 ../bin/ncGFS4_2_pf                  $(USGSROOT)/bin/
-#
+	install -d $(INSTALLDIR)/bin/scripts
+	install -d $(INSTALLDIR)/bin/webscripts
+	install -d $(INSTALLDIR)/wrk
+	install -d $(INSTALLDIR)/share
+	install -m 755 bin/getAzRng                         $(INSTALLDIR)/bin/getAzRng
+	install -m 755 bin/webscripts/run_InfraTool_Web.sh  $(INSTALLDIR)/bin/webscripts/run_InfraTool_Web.sh
+	install -m 755 bin/webscripts/plot_Nby2D_tloss.py   $(INSTALLDIR)/bin/webscripts/plot_Nby2D_tloss.py
+	install -m 755 bin/webscripts/plot_tloss2d.m        $(INSTALLDIR)/bin/webscripts/plot_tloss2d.m
+	install -m 755 scripts/make_g2sFC_files.sh          $(INSTALLDIR)/bin/scripts/make_g2sFC_files.sh
+	install -m 755 scripts/make_g2sSH_files.sh          $(INSTALLDIR)/bin/scripts/make_g2sSH_files.sh
+	install -m 755 scripts/run_modess_maps.sh           $(INSTALLDIR)/bin/scripts/run_modess_maps.sh
+
 #uninstall:
 #	rm -f $(INSTALLDIR)/bin/citywriter
 #	rm -f $(INSTALLDIR)/bin/convert_to_decimal
