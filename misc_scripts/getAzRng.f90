@@ -46,7 +46,7 @@
         if(inlon2.lt.0.0_4.or.inlon2.gt.360.0_4)inlon2=mod(inlon2+360.0_4,360.0_4)
         call get_command_argument(4, arg, status)
         read(arg,*)inlat2
-        if(inlat2.lt.-90.0.or.inlat2.gt.90.0)then
+        if(inlat2.lt.-90.0_4.or.inlat2.gt.90.0_4)then
           write(6,*)"ERROR: Latitude2 must be between -90 and 90"
           stop 1
         endif
@@ -56,12 +56,12 @@
         lat2 = DEG2RAD * inlat2
         dlon = lon2 - lon1
         dlat = lat2 - lat1
-        a = sin(0.5*dlat)**2.0 + cos(lat1)*cos(lat2)*sin(0.5*dlon)**2.0
-        c = 2.0*atan2(sqrt(a),sqrt(1.0-a))
+        a = sin(0.5_4*dlat)**2.0_4 + cos(lat1)*cos(lat2)*sin(0.5_4*dlon)**2.0_4
+        c = 2.0_4*atan2(sqrt(a),sqrt(1.0_4-a))
         Rng = Re * c
         Az = atan2(sin(dlon)*cos(lat2),cos(lat1)*sin(lat2)-sin(lat1)*cos(lat2)*cos(dlon))
-        if (Az.lt.0.0) then
-          Az = Az + 360.0
+        if (Az.lt.0.0_4) then
+          Az = Az + 360.0_4
         endif
         write(6,'(2f15.4)') Az/DEG2RAD, Rng
       endif

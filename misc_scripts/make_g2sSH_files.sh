@@ -1,8 +1,15 @@
 #!/bin/bash
 
-AVOG2S=/opt/USGS/AVOG2S
-WRK=/home/ash3d/G2S_today
-WWW=/data/www/vsc-ash.wr.usgs.gov/G2S
+INSTALLDIR="/opt/USGS"
+WINDROOT="/data/WindFiles"
+WWW="/data/www/vsc-ash.wr.usgs.gov/G2S"
+
+AVOG2S=${INSTALLDIR}/AVOG2S
+SHROOT={$WINDROOT}/g2s_SH
+RAWROOT={$SHROOT}/RAW_SH
+
+#WRK=/home/ash3d/G2S_today
+WRK=${AVOG2S}/wrk
 
 rc=0
 
@@ -55,16 +62,12 @@ export HWMPATH
 gen_SC=${AVOG2S}/bin/g2s_genSC_HWM14
 gen_Res=${AVOG2S}/bin/g2s_ResampleAtmos
 
-#rm -f nam.t00z*
 rm -f Ap.dat F107.dat NGDC
-#rm -f G2S_SH_${YYYY}*_${FChour}Z_wf20.nc
-#rm -f G2S_SH_${YYYY}*_${FChour}Z_wf20_*_res.raw
 
 ln -s ${AVOG2S}/ExternalData/Ap_Forecast/NGDC_NOAA_Archive NGDC
 ln -s ${AVOG2S}/ExternalData/Ap_Forecast/Ap.dat
 ln -s ${AVOG2S}/ExternalData/Ap_Forecast/F107.dat
-#ln -s /data/WindFiles/gfs/gfs.${YYYYMMDD}00/${YYYYMMDD}00.f0${FChour}.nc .
-ln -s /data/WindFiles/gfs/gfs.${YYYYMMDD}00/gfs.t00z.pgrb2.0p50.f0${FChour} ${YYYYMMDD}00.f0${FChour}.grib2
+ln -s ${WINDROOT}/gfs/gfs.${YYYYMMDD}00/gfs.t00z.pgrb2.0p50.f0${FChour} ${YYYYMMDD}00.f0${FChour}.grib2
 
 outfile=G2S_SH_${YYYYMMDD}_${FChour}Z_wf20.nc
 
@@ -86,24 +89,8 @@ echo "${outfile}"                                         >> ${CTR}
 # Calculate the coefficient file
 ${gen_SC} ${CTR}
 # copy file to the public website
-cp -a ${outfile} ${WWW}/
+cp -a ${outfile} ${WWW}/${outfile}
+mv ${outfile} ${SHROOT}/${outfile}
 # Now generate the reconstituted *.raw files
 ${gen_Res} ${outfile}
-mv G2S_SH_${YYYYMMDD}_${FChour}Z_wf20*raw ${WRK}/RAW_SH/
-
-SH_Retain=3
-echo "Deleting all SH RAW files in ${WRK}/RAW_SH older than ${SH_Retain} days"
-find ${WRK}/RAW_SH -type f -mtime +${SH_Retain} -exec rm '{}' \;
-find ${WRK}/G2S_SH_*wf20.nc -type f -mtime +${SH_Retain} -exec rm '{}' \;
-find ${WRK}/2*00.f*.nc -type f -mtime +10 -exec rm '{}' \;
-
-
-# Finally, launch the forward modeling script
-#./G2S_GeoAc_FC.sh ${YYYY} ${MM} ${DD} ${FChour}
-
-#/usr/bin/rsync -rlptDxS --ignore-errors --force /webdata/int-vsc-ash.wr.usgs.gov/htdocs/G2S/ ash3d@int-ash3d:/webdata/int-vsc-ash.wr.usgs.gov/htdocs/G2S/
-#/usr/bin/rsync -az --delete /webdata/int-vsc-ash.wr.usgs.gov/htdocs/G2S/ ash3d@int-ash3d:/webdata/int-vsc-ash.wr.usgs.gov/htdocs/G2S/
-
-
-#find /webdata/int-vsc-ash.wr.usgs.gov/htdocs/G2S_Modess/ -type f -mtime +28 -exec rm '{}' \;
-
+mv G2S_SH_${YYYYMMDD}_${FChour}Z_wf20*raw ${RAWROOT}
