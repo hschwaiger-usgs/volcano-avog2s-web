@@ -1,13 +1,13 @@
 #!/bin/bash
 
 
-WRK=/home/ash3d/G2S_today
 AVOG2S=/opt/USGS/AVOG2S
-ART2DDIR=${AVOG2S}/ExternalPrograms/ART2D
-GEOACDIR=${AVOG2S}/ExternalPrograms/GeoAc
-NCPADIR=${AVOG2S}/ExternalPrograms/ncpaprop/bin
+WRK=${AVOG2S}/wrk
+ART2DDIR=/home/ash3d/Programs/Other/ART2D
+GEOACDIR=/home/ash3d/Programs/GIT/GeoAc
+NCPADIR=/home/ash3d/Programs/GIT/ncpaprop/bin
 PYDIR=/home/ash3d/anaconda3/bin
-TOPO=/opt/Ash3d/data/topo/etopo.nc
+TOPO=/opt/USGS/data/Topo/etopo.nc
 DATA=/data/WindFiles/AVOG2S
 
 #WRK=/media/hschwaiger/6249f4be-4861-4a90-95ea-743a7e0a0579/Infrasound/BV_runs/Autoplotting/

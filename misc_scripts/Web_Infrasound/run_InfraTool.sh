@@ -1,12 +1,14 @@
 #!/bin/bash
 
-WRK=/home/ash3d/G2S_today
+
 AVOG2S=/opt/USGS/AVOG2S
-ART2DDIR=/home/ash3d/Programs/ART2D/bin
+WRK=${AVOG2S}/wrk
+ART2DDIR=/home/ash3d/Programs/Other/ART2D
 GEOACDIR=/home/ash3d/Programs/GIT/GeoAc
 NCPADIR=/home/ash3d/Programs/GIT/ncpaprop/bin
 PYDIR=/home/ash3d/anaconda3/bin
 TOPO=/opt/USGS/data/Topo/etopo.nc
+DATA=/data/WindFiles/AVOG2S
 
 #WRK=/media/hschwaiger/6249f4be-4861-4a90-95ea-743a7e0a0579/Infrasound/BV_runs/Autoplotting/
 #AVOG2S=/opt/USGS/AVOG2S
@@ -16,21 +18,102 @@ TOPO=/opt/USGS/data/Topo/etopo.nc
 #PYDIR=/home/hschwaiger/anaconda3/bin
 #TOPO=/data/TOPO/ETOPO1/ETOPO1_Ice_c_gmt4.nc
 
+rc=0
+echo "checking input arguments"
+if [ -z ${1} ]
+then
+  echo "Error: You must specify a directory name (no spaces)"
+  exit 1
+fi
+if [ -z $2 ]
+then
+  echo "Error: You must specify a year (YYYY)"
+  exit 1
+fi
+if [ -z $3 ]
+then
+  echo "Error: You must specify a month (MM)"
+  exit 1
+fi
+if [ -z $4 ]
+then
+  echo "Error: You must specify a day (DD)"
+  exit 1
+fi
+if [ -z $5 ]
+then
+  echo "Error: You must specify an hour (HH=00,06,12,18,24)"
+  exit 1
+fi
+if [ -z $6 ]
+then
+  echo "Error: You must specify a source longitude (degrees 0->360)"
+  exit 1
+fi
+if [ -z $7 ]
+then
+  echo "Error: You must specify a source latitude (degrees -80->80)"
+  exit 1
+fi
+if [ -z $8 ]
+then
+  echo "Error: You must specify a source height (km)"
+  exit 1
+fi
+if [ -z $9 ]
+then
+  echo "Error: You must specify an azimuth1 (0->360)"
+  exit 1
+fi
+if [ -z ${10} ]
+then
+  echo "Error: You must specify an azimuth2 (0-360)"
+  exit 1
+fi
+if [ -z ${11} ]
+then
+  echo "Error: You must specify an azimuth increment (degrees)"
+  exit 1
+fi
+if [ -z ${12} ]
+then
+  echo "Error: You must specify a model ID"
+  exit 1
+fi
+if [ -z ${13} ]
+then
+  echo "Error: You must specify a range (km 0->1000)"
+  exit 1
+fi
+if [ -z ${14} ]
+then
+  echo "Error: You must specify a frequency (Hz 0.1->1.0)"
+  exit 1
+fi
+if [ -z ${15} ]
+then
+  echo "Error: You must specify a volcano name (no spaces)"
+  exit 1
+fi
 
-YYYY=$1  # Date should be: today-3 days < date < today + 1 day
-MM=$2
-DD=$3
-HH=$4
-SRCX=$5  # longitude should be in range 0-360
-SRCY=$6
-SRCZ=$7  # in km (0<= z < 50)
-AZ1=$8   # degrees (0 < az1 < 360)
-AZ2=$9   # degrees (0 < az2 < 360)
-DAZ=${10}  # degrees (0 < daz < 180)
-MODELID=${11}
-RNG=${12}  # km (0 < rng < 1000)
-FREQ=${13} # Hz (0.1 < freq < 2.0)
-SRCNAME=${14}   # No spaces
+TMPDIR=${1}     # No spaces
+YYYY=$2         # Date should be: today-3 days < date < today
+MM=$3           #
+DD=$4           #
+HH=$5           # 00,06,12,18,24
+SRCX=$6         # longitude should be in range 0 -> 360
+SRCY=$7         # latitude (-80 -> 80)
+SRCZ=$8         # in km (0<= z < 50)
+AZ1=$9          # degrees (0 < az1 < 360)
+AZ2=${10}          # degrees (0 < az2 < 360)
+DAZ=${11}       # degrees (0 < daz < 180)
+MODELID=${12}   # 1-11 (1,3,4,8 not implemented)
+RNG=${13}       # km (0 < rng < 1000)
+FREQ=${14}      # Hz (0.1 < freq < 2.0)
+SRCNAME=${15}   # No spaces
+
+#mkdir -p ${TMPDIR}
+cd ${TMPDIR}
 
 if [[ "$MODELID" -eq 1 ]]  ; then    ## Model  1:  Art2d              (profile)
   DIM=2
