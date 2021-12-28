@@ -2,13 +2,13 @@ Infratool expects scripts in /opt/USGS/AVOG2S/bin/webscripts
 
 crontab entries:
 ######## Ground to space stuff
-15 03,09,15,21     * * *   /opt/USGS/AVOG2S/ExternalData/Ap_Forecast/get_ApFC                     > /home/ash3d/cron_logs/ApF.log       2>&1
-25 01              * * *   /home/ash3d/G2S_today/make_g2sSH_files.sh 0                            > /home/ash3d/cron_logs/SH_GeoAc_00.log 2>&1
-30 01              * * *   /home/ash3d/G2S_today/make_g2sSH_files.sh 6                            > /home/ash3d/cron_logs/SH_GeoAc_06.log 2>&1
-35 01              * * *   /home/ash3d/G2S_today/make_g2sSH_files.sh 12                           > /home/ash3d/cron_logs/SH_GeoAc_12.log 2>&1
-40 01              * * *   /home/ash3d/G2S_today/make_g2sSH_files.sh 18                           > /home/ash3d/cron_logs/SH_GeoAc_18.log 2>&1
-45 01              * * *   /home/ash3d/G2S_today/make_g2sSH_files.sh 24                           > /home/ash3d/cron_logs/SH_GeoAc_24.log 2>&1
-20 07              * * *   /home/ash3d/G2S_today/run_volcs.sh 06                                  > /home/ash3d/cron_logs/run_volcs06.log 2>&1
-21 07              * * *   /home/ash3d/G2S_today/run_volcs.sh 12                                  > /home/ash3d/cron_logs/run_volcs12.log 2>&1
-22 07              * * *   /home/ash3d/G2S_today/run_volcs.sh 18                                  > /home/ash3d/cron_logs/run_volcs18.log 2>&1
-23 07              * * *   /home/ash3d/G2S_today/run_volcs.sh 24                                  > /home/ash3d/cron_logs/run_volcs24.log 2>&1
+15 03,09,15,21     * * *   /opt/USGS/AVOG2S/ExternalData/Ap_Forecast/get_ApFC       > /home/ash3d/cron_logs/ApF.log       2>&1
+25 01              * * *   /opt/USGS/AVOG2S/bin/scripts/make_g2sSH_files.sh 0       > /home/ash3d/cron_logs/SH_GeoAc_00.log 2>&1
+30 01              * * *   /opt/USGS/AVOG2S/bin/scripts/make_g2sSH_files.sh 6       > /home/ash3d/cron_logs/SH_GeoAc_06.log 2>&1
+35 01              * * *   /opt/USGS/AVOG2S/bin/scripts/make_g2sSH_files.sh 12      > /home/ash3d/cron_logs/SH_GeoAc_12.log 2>&1
+40 01              * * *   /opt/USGS/AVOG2S/bin/scripts/make_g2sSH_files.sh 18      > /home/ash3d/cron_logs/SH_GeoAc_18.log 2>&1
+45 01              * * *   /opt/USGS/AVOG2S/bin/scripts/make_g2sSH_files.sh 24      > /home/ash3d/cron_logs/SH_GeoAc_24.log 2>&1
+20 07              * * *   /opt/USGS/AVOG2S/bin/scripts/run_modess_maps.sh 06       > /home/ash3d/cron_logs/run_volcs06.log 2>&1
+21 07              * * *   /opt/USGS/AVOG2S/bin/scripts/run_modess_maps.sh 12       > /home/ash3d/cron_logs/run_volcs12.log 2>&1
+22 07              * * *   /opt/USGS/AVOG2S/bin/scripts/run_modess_maps.sh 18       > /home/ash3d/cron_logs/run_volcs18.log 2>&1
+23 07              * * *   /opt/USGS/AVOG2S/bin/scripts/run_modess_maps.sh 24       > /home/ash3d/cron_logs/run_volcs24.log 2>&1

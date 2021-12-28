@@ -137,8 +137,8 @@ mv ${outfile} ${SHROOT}/${outfile}
 ${gen_Res} ${outfile}
 mv G2S_SH_${YYYYMMDD}_${FChour}Z_wf20*raw ${RAWROOT}
 
-rm NGDC
-rm Ap.dat
-rm F107.dat
+#rm NGDC
+#rm Ap.dat
+#rm F107.dat
 #rm ${YYYYMMDD}${FC}.f0${HH}.grib2
 #rm tmpSH_${HH}.ctr
