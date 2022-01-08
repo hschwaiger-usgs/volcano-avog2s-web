@@ -170,6 +170,7 @@ install:
 	install -m 755 scripts/autorun_avog2s_nam.sh        $(INSTALLDIR)/bin/scripts/autorun_avog2s_nam.sh
 	install -m 755 scripts/make_g2sSH_files.sh          $(INSTALLDIR)/bin/scripts/make_g2sSH_files.sh
 	install -m 755 scripts/run_modess_maps.sh           $(INSTALLDIR)/bin/scripts/run_modess_maps.sh
+	install -m 755 share/ModMap_Volcs.txt               $(INSTALLDIR)/share/ModMap_Volcs.txt
 
 #uninstall:
 #	rm -f $(INSTALLDIR)/bin/citywriter

@@ -1,22 +1,87 @@
 #!/bin/bash
+################################################################################
+#
+#      This file is a component of the volcanic infrasound monitoring software
+#      written at the U.S. Geological Survey by Hans F. Schwaiger (hschwaiger@usgs.gov)
+#      and Alexandra M. Iezzi (amiezzi@alaska.edu).  These programs relies on tools
+#      developed for the ash transport and dispersion model Ash3d, written at the
+#      U.S. Geological Survey by Hans F. Schwaiger (hschwaiger@usgs.gov), Larry G.
+#      Mastin (lgmastin@usgs.gov), and Roger P. Denlinger (roger@usgs.gov).
+#
+#      The model and its source code are products of the U.S. Federal Government and therefore
+#      bear no copyright.  They may be copied, redistributed and freely incorporated 
+#      into derivative products.  However as a matter of scientific courtesy we ask that
+#      you credit the authors and cite published documentation of this model (below) when
+#      publishing or distributing derivative products.
+#
+#      Schwaiger, H.F., Alexandra M. Iezzi and David Fee;
+#         AVO-G2S:  A modified, open-source Ground-to-Space atmospheric specifications
+#           for infrasound model; Computers and Geosciences, v125, p90-97, 2019,
+#           doi:10.1016/j.cageo.2018.12.013
+#
+#      We make no guarantees, expressed or implied, as to the usefulness of the software
+#      and its documentation for any purpose.  We assume no responsibility to provide
+#      technical support to users of this software.
+#
+###############################################################################
+#
+#  run_InfraTool.sh
+#
+#  This script is a command-line tool that provides a unified interface to several
+#  infrasound forward modeling software packages.  There are 15 required command-
+#  line arguments, though not all arguments are actually used depending on the
+#  forward model selected.  The arguments are:
+#   1) name of run directory    (no white spaces).  Ideally, this is unique.
+#   2) 4-char year of event     (YYYY)
+#   3) 2-char month of event    (MM)
+#   4) 2-char day of event      (DD)
+#   5) 2-char hour of event     (HH one of 00,06,12,18,24)
+#   6) longitude of source      (real valued in range 0.0-360.0)
+#   7) latitude of source       (real valued in range -90.0-90.0)
+#   8) altitude of source       (real valued in km)
+#   9) azimuth of start profile (real valued in range 0.0-360.0)
+#  10) azimuth of end profile   (real valued in range 0.0-360.0)
+#  11) azimuth increment        (real valued in degrees)
+#  12) model ID                 (integer)
+#         ID = 1 : Art2d              (profile)
+#         ID = 2 : GeoAcGlobal        (profile)
+#         ID = 3 : GeoAcGlobal.RngDep (profile)
+#         ID = 4 : GeoAcGlobal.RngDep (sweep)
+#         ID = 5 : Modess (strat.)    (profile)
+#         ID = 6 : CModess (strat.)   (profile)
+#         ID = 7 : WMod (strat.)      (profile)
+#         ID = 8 : ModBB              (profile)
+#         ID = 9 : ModessRD1WCM       (profile)
+#         ID =10 : pape               (profile)
+#         ID =11 : Modess             (sweep)
+#  13) range of profile       (real valued (km) in range 0.0-1000.0)
+#  14) frequency of source    (real valued in Hz, 0.1-1.0)
+#  15) name of source/volcano (no white spaces)
+#
+#  This script will build the control file to extract the vertical profile
+#  or the 2d transect with the assumption that the reconstructed AVO-G2S
+#  atmospheric model files are in ${DATA}/RAW_SH/. These may only be available
+#  for the past few days depending on your purge settings.
+#  The specified forward model is then called, followed by the appropriate plot
+#  script (plot_tloss2d.m or plot_Nby2D_tloss.py). The output figure is temp.png
+#
+#  The following example runs the Modess sweep tool (ID=11) for Cleveland volcano
+#  with 1-degree increments at a frequency of 0.1 Hz and with a range of 850 km
+#
+# run_InfraTool.sh tmpClev 2021 12 03 00 190.055 52.8222 1.7 41 50 1 11 850.0 0.1 Cleveland
+#
+###############################################################################
 
+AVOG2Suser=ash3d
 
 AVOG2S=/opt/USGS/AVOG2S
 WRK=${AVOG2S}/wrk
-ART2DDIR=/home/ash3d/Programs/Other/ART2D
-GEOACDIR=/home/ash3d/Programs/GIT/GeoAc
-NCPADIR=/home/ash3d/Programs/GIT/ncpaprop/bin
-PYDIR=/home/ash3d/anaconda3/bin
+ART2DDIR=/home/${AVOG2Suser}/Programs/Other/ART2D
+GEOACDIR=/home/${AVOG2Suser}/Programs/GIT/GeoAc
+NCPADIR=/home/${AVOG2Suser}/Programs/GIT/ncpaprop/bin
+PYDIR=/home/${AVOG2Suser}/anaconda3/bin
 TOPO=/opt/USGS/data/Topo/etopo.nc
 DATA=/data/WindFiles/AVOG2S
-
-#WRK=/media/hschwaiger/6249f4be-4861-4a90-95ea-743a7e0a0579/Infrasound/BV_runs/Autoplotting/
-#AVOG2S=/opt/USGS/AVOG2S
-#ART2DDIR=/home/hschwaiger/work/USGS/Ground2Space/ART2D/bin
-#GEOACDIR=/home/hschwaiger/Programs/GIT/GeoAc-master/
-#NCPADIR=/home/hschwaiger/work/USGS/Software_repos/GIT/ncpaprop/bin
-#PYDIR=/home/hschwaiger/anaconda3/bin
-#TOPO=/data/TOPO/ETOPO1/ETOPO1_Ice_c_gmt4.nc
 
 rc=0
 echo "checking input arguments"
@@ -112,8 +177,8 @@ RNG=${13}       # km (0 < rng < 1000)
 FREQ=${14}      # Hz (0.1 < freq < 2.0)
 SRCNAME=${15}   # No spaces
 
-#mkdir -p ${TMPDIR}
-cd ${TMPDIR}
+mkdir -p ${WRK}/${TMPDIR}
+cd ${WRK}/${TMPDIR}
 
 if [[ "$MODELID" -eq 1 ]]  ; then    ## Model  1:  Art2d              (profile)
   DIM=2
@@ -180,80 +245,97 @@ fi
 LONPMIN=`echo "x = ${SRCXMAP}-10; scale = 0; x / 1" | bc -l`
 LATPMIN=`echo "x = ${SRCY}-8; scale = 0; x / 1" | bc -l`
 
-echo "${yyyy}"    > yyyy.dat
-echo "${mm}"      > mm.dat
-echo "${dd}"      > dd.dat
-echo "${hh}"      > hh.dat
-echo "${SRCX}"    > srcx.dat
-echo "${SRCXMAP}" > srcxmap.dat
-echo "${SRCY}"    > srcy.dat
-echo "${SRCZ}"    > srcz.dat
-echo "${AZ1}"     > az1.dat
-echo "${AZ2}"     > az2.dat
-echo "${DAZ}"     > daz.dat
-echo "${MODELID}" > modelid.dat
-echo "${RNG}"     > rng.dat
-echo "${FREQ}"    > freq.dat
-echo "${SRCNAME}" > srcname.dat
-echo "${LONPMIN}" > lonpmin.dat
-echo "${LATPMIN}" > latpmin.dat
+echo "${yyyy}"    > ${WRK}/${TMPDIR}/yyyy.dat
+echo "${mm}"      > ${WRK}/${TMPDIR}/mm.dat
+echo "${dd}"      > ${WRK}/${TMPDIR}/dd.dat
+echo "${hh}"      > ${WRK}/${TMPDIR}/hh.dat
+echo "${SRCX}"    > ${WRK}/${TMPDIR}/srcx.dat
+echo "${SRCXMAP}" > ${WRK}/${TMPDIR}/srcxmap.dat
+echo "${SRCY}"    > ${WRK}/${TMPDIR}/srcy.dat
+echo "${SRCZ}"    > ${WRK}/${TMPDIR}/srcz.dat
+echo "${AZ1}"     > ${WRK}/${TMPDIR}/az1.dat
+echo "${AZ2}"     > ${WRK}/${TMPDIR}/az2.dat
+echo "${DAZ}"     > ${WRK}/${TMPDIR}/daz.dat
+echo "${MODELID}" > ${WRK}/${TMPDIR}/modelid.dat
+echo "${RNG}"     > ${WRK}/${TMPDIR}/rng.dat
+echo "${FREQ}"    > ${WRK}/${TMPDIR}/freq.dat
+echo "${SRCNAME}" > ${WRK}/${TMPDIR}/srcname.dat
+echo "${LONPMIN}" > ${WRK}/${TMPDIR}/lonpmin.dat
+echo "${LATPMIN}" > ${WRK}/${TMPDIR}/latpmin.dat
 
-ln -s ${DATA}/RAW_SH/G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_*_res.raw .
+ln -s ${DATA}/RAW_SH/G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_U_res.raw ${WRK}/${TMPDIR}/G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_U_res.raw
+ln -s ${DATA}/RAW_SH/G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_V_res.raw ${WRK}/${TMPDIR}/G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_V_res.raw
+ln -s ${DATA}/RAW_SH/G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_T_res.raw ${WRK}/${TMPDIR}/G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_T_res.raw
+
 
 if [[ "$DIM" -eq 1 ]] ; then
-  echo "${SRCX} ${SRCY}"                                  > temp.ctr
-  echo "180.0 0.2"                                       >> temp.ctr
-  echo "1"                                               >> temp.ctr
-  echo "720 0.5 0.0"                                     >> temp.ctr
-  echo "361 0.5 -90.0"                                   >> temp.ctr
-  echo "26 1.0"                                          >> temp.ctr
-  echo "50 1.5"                                          >> temp.ctr
-  echo "50 2.0"                                          >> temp.ctr
-  echo "G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_U_res.raw"  >> temp.ctr
-  echo "G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_V_res.raw"  >> temp.ctr
-  echo "G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_T_res.raw"  >> temp.ctr
-  echo "Volc"                                            >> temp.ctr
+  echo "${SRCX} ${SRCY}"                                  > ${WRK}/${TMPDIR}/temp.ctr
+  echo "180.0 0.2"                                       >> ${WRK}/${TMPDIR}/temp.ctr
+  echo "1"                                               >> ${WRK}/${TMPDIR}/temp.ctr
+  echo "720 0.5 0.0"                                     >> ${WRK}/${TMPDIR}/temp.ctr
+  echo "361 0.5 -90.0"                                   >> ${WRK}/${TMPDIR}/temp.ctr
+  echo "26 1.0"                                          >> ${WRK}/${TMPDIR}/temp.ctr
+  echo "50 1.5"                                          >> ${WRK}/${TMPDIR}/temp.ctr
+  echo "50 2.0"                                          >> ${WRK}/${TMPDIR}/temp.ctr
+  echo "G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_U_res.raw"  >> ${WRK}/${TMPDIR}/temp.ctr
+  echo "G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_V_res.raw"  >> ${WRK}/${TMPDIR}/temp.ctr
+  echo "G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_T_res.raw"  >> ${WRK}/${TMPDIR}/temp.ctr
+  echo "Volc"                                            >> ${WRK}/${TMPDIR}/temp.ctr
   ${AVOG2S}/bin/g2s_Extract_Sonde temp.ctr
+  echo "#% 1, Z, KM"       > Volc0.tmp
+  echo "#% 2, T, DEGK"    >> Volc0.tmp
+  echo "#% 3, U, MPS"     >> Volc0.tmp
+  echo "#% 4, V, MPS"     >> Volc0.tmp
+  echo "#% 5, RHO, GPCM3" >> Volc0.tmp
+  echo "#% 6, P, MBAR"    >> Volc0.tmp
+  cat Volc0.tmp Volc0.met  > Volc0.dat
+
 fi
 if [[ "$DIM" -eq 2 ]] ; then
   ln -s ${TOPO} etopo.nc
-  echo "${SRCX} ${SRCY}"                                  > temp.ctr
-  echo "180.0 0.2"                                       >> temp.ctr
-  echo "1"                                               >> temp.ctr
-  echo "${AZ1} 47.69 0.01"                               >> temp.ctr
-  echo "720 0.5 0.0"                                     >> temp.ctr
-  echo "361 0.5 -90.0"                                   >> temp.ctr
-  echo "26 1.0"                                          >> temp.ctr
-  echo "50 1.5"                                          >> temp.ctr
-  echo "50 2.0"                                          >> temp.ctr
-  echo "G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_U_res.raw"  >> temp.ctr
-  echo "G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_V_res.raw"  >> temp.ctr
-  echo "G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_T_res.raw"  >> temp.ctr
-  echo "Volc"                                            >> temp.ctr
-  echo "ProfLonLat"                                      >> temp.ctr
-  echo "etopo.nc"                                        >> temp.ctr
+  echo "${SRCX} ${SRCY}"                                  > ${WRK}/${TMPDIR}/temp.ctr
+  echo "180.0 0.2"                                       >> ${WRK}/${TMPDIR}/temp.ctr
+  echo "1"                                               >> ${WRK}/${TMPDIR}/temp.ctr
+  echo "${AZ1} 47.69 0.01"                               >> ${WRK}/${TMPDIR}/temp.ctr
+  echo "720 0.5 0.0"                                     >> ${WRK}/${TMPDIR}/temp.ctr
+  echo "361 0.5 -90.0"                                   >> ${WRK}/${TMPDIR}/temp.ctr
+  echo "26 1.0"                                          >> ${WRK}/${TMPDIR}/temp.ctr
+  echo "50 1.5"                                          >> ${WRK}/${TMPDIR}/temp.ctr
+  echo "50 2.0"                                          >> ${WRK}/${TMPDIR}/temp.ctr
+  echo "G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_U_res.raw"  >> ${WRK}/${TMPDIR}/temp.ctr
+  echo "G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_V_res.raw"  >> ${WRK}/${TMPDIR}/temp.ctr
+  echo "G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_T_res.raw"  >> ${WRK}/${TMPDIR}/temp.ctr
+  echo "Volc"                                            >> ${WRK}/${TMPDIR}/temp.ctr
+  echo "ProfLonLat"                                      >> ${WRK}/${TMPDIR}/temp.ctr
+  echo "etopo.nc"                                        >> ${WRK}/${TMPDIR}/temp.ctr
   ${AVOG2S}/bin/g2s_Extract_Xsec temp.ctr
 fi
 if [[ "$DIM" -eq 3 ]] ; then
-  echo "50.0 60.0 5"                                      > temp.ctr
-  echo "185.0 205.0 9"                                   >> temp.ctr
-  echo "180.0 0.2"                                       >> temp.ctr
-  echo "1"                                               >> temp.ctr
-  echo "720 0.5 0.0"                                     >> temp.ctr
-  echo "361 0.5 -90.0"                                   >> temp.ctr
-  echo "26 1.0"                                          >> temp.ctr
-  echo "50 1.5"                                          >> temp.ctr
-  echo "50 2.0"                                          >> temp.ctr
-  echo "G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_U_res.raw"  >> temp.ctr
-  echo "G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_V_res.raw"  >> temp.ctr
-  echo "G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_T_res.raw"  >> temp.ctr
-  echo "Volc"                                            >> temp.ctr
+  echo "50.0 60.0 5"                                      > ${WRK}/${TMPDIR}/temp.ctr
+  echo "185.0 205.0 9"                                   >> ${WRK}/${TMPDIR}/temp.ctr
+  echo "180.0 0.2"                                       >> ${WRK}/${TMPDIR}/temp.ctr
+  echo "1"                                               >> ${WRK}/${TMPDIR}/temp.ctr
+  echo "720 0.5 0.0"                                     >> ${WRK}/${TMPDIR}/temp.ctr
+  echo "361 0.5 -90.0"                                   >> ${WRK}/${TMPDIR}/temp.ctr
+  echo "26 1.0"                                          >> ${WRK}/${TMPDIR}/temp.ctr
+  echo "50 1.5"                                          >> ${WRK}/${TMPDIR}/temp.ctr
+  echo "50 2.0"                                          >> ${WRK}/${TMPDIR}/temp.ctr
+  echo "G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_U_res.raw"  >> ${WRK}/${TMPDIR}/temp.ctr
+  echo "G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_V_res.raw"  >> ${WRK}/${TMPDIR}/temp.ctr
+  echo "G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_T_res.raw"  >> ${WRK}/${TMPDIR}/temp.ctr
+  echo "Volc"                                            >> ${WRK}/${TMPDIR}/temp.ctr
   ${AVOG2S}/bin/g2s_Extract_Grid temp.ctr
 fi
 
+
+####################################################################################
+##  ART2D software (no public source found, legacy code)
 if [[ "$MODELID" -eq 1 ]]  ; then    ## Model  1:  Art2d              (profile)
   echo " Art2d not implemented"
+  exit
 fi
+####################################################################################
+##  GeoAc software (https://github.com/LANL-Seismoacoustics/GeoAc)
 if [[ "$MODELID" -eq 2 ]]  ; then    ## Model  2:  GeoAcGlobal        (profile)                                       -180->180
   echo "CALLING:   ${EXEC} -prop Volc0.met theta_min=-30.0 theta_max=55.0 theta_step=1.0 azimuth=${AZ1} bounces=10 lat_src=${SRCY} lon_src=${SRCX} z_src=${SRCZ} CalcAmp=False WriteAtmo=True"
   ${EXEC} -prop Volc0.met theta_min=-30.0 theta_max=55.0 theta_step=1.0 azimuth=${AZ1} bounces=10 lat_src=${SRCY} lon_src=${SRCX} z_src=${SRCZ} CalcAmp=False WriteAtmo=True
@@ -266,23 +348,43 @@ if [[ "$MODELID" -eq 4 ]]  ; then    ## Model  4:  GeoAcGlobal.RngDep (sweep)
   echo "CALLING:  ${EXEC} -prop Volc Volc.loclat Volc.loclon theta_min=-30.0 theta_max=55.0 theta_step=1.0 phi_min=${AZ1} phi_max=${AZ2} phi_step=${DAZ} bounces=10 lat_src=${SRCY} lon_src=${SRCX} z_src=${SRCZ} CalcAmp=False WriteAtmo=True"
   ${EXEC} -prop Volc Volc.loclat Volc.loclon theta_min=-30.0 theta_max=55.0 theta_step=1.0 phi_min=${AZ1} phi_max=${AZ2} phi_step=${DAZ} bounces=10 lat_src=${SRCY} lon_src=${SRCX} z_src=${SRCZ} CalcAmp=False WriteAtmo=True
 fi
+####################################################################################
+##  ncpaprop software (old version at https://github.com/chetzer-ncpa/ncpaprop)
+##                    (new version at https://github.com/chetzer-ncpa/ncpaprop-release)
 if [[ "$MODELID" -eq 5 ]]  ; then    ## Model  5:  Modess (strat.)    (profile)
-  echo "CALLING:   ${EXEC} --atmosfile Volc0.met --skiplines 0 --atmosfileorder ztuvdp --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --write_2D_TLoss"
-  ${EXEC} --atmosfile Volc0.met --skiplines 0 --atmosfileorder ztuvdp --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --write_2D_TLoss
+  # Old version format
+  #echo "CALLING:   ${EXEC} --atmosfile Volc0.met --skiplines 0 --atmosfileorder ztuvdp --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --write_2d_tloss"
+  #${EXEC} --atmosfile Volc0.met --skiplines 0 --atmosfileorder ztuvdp --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --write_2d_tloss
+  # ncpaprop-release (current)
+  echo "CALLING:   ${EXEC} --atmosfile Volc0.dat --singleprop --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --write_2d_tloss"
+  ${EXEC} --atmosfile Volc0.dat --singleprop --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --write_2d_tloss
+
   ln -s ${AVOG2S}/bin/webscripts/plot_tloss2d.m plot_tloss2d
   echo "CALLING:   ./plot_tloss2d"
   ./plot_tloss2d
 fi
 if [[ "$MODELID" -eq 6 ]]  ; then    ## Model  6:  CModess (stra.)    (profile)
-  echo "CALLING:   ${EXEC} --atmosfile Volc0.met --skiplines 0 --atmosfileorder ztuvdp --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --write_2D_TLoss"
-  ${EXEC} --atmosfile Volc0.met --skiplines 0 --atmosfileorder ztuvdp --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --write_2D_TLoss
+  # Old version format
+  #echo "CALLING:   ${EXEC} --atmosfile Volc0.met --skiplines 0 --atmosfileorder ztuvdp --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --write_2d_tloss"
+  #${EXEC} --atmosfile Volc0.met --skiplines 0 --atmosfileorder ztuvdp --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --write_2d_tloss
+  # ncpaprop-release (current)
+  echo " CModess not yet implemented"
+  exit
+  echo "CALLING:   ${EXEC} --atmosfile Volc0.dat --singleprop --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --write_2d_tloss"
+  ${EXEC} --atmosfile Volc0.dat --singleprop --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --write_2d_tloss
+
   echo "CALLING:  ./plot_tloss2d"
   ln -s ${AVOG2S}/bin/webscripts/plot_tloss2d.m plot_tloss2d
   ./plot_tloss2d
 fi
 if [[ "$MODELID" -eq 7 ]]  ; then    ## Model  7:  WMod (stra.)       (profile)
-  echo "CALLING:   ${EXEC} --atmosfile Volc0.met --skiplines 0 --atmosfileorder ztuvdp --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --write_2D_TLoss"
-  ${EXEC} --atmosfile Volc0.met --skiplines 0 --atmosfileorder ztuvdp --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --write_2D_TLoss
+  # Old version format
+  #echo "CALLING:   ${EXEC} --atmosfile Volc0.met --skiplines 0 --atmosfileorder ztuvdp --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --write_2d_tloss"
+  #${EXEC} --atmosfile Volc0.met --skiplines 0 --atmosfileorder ztuvdp --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --write_2d_tloss
+  # ncpaprop-release (current)
+
+  echo " WMod not yet implemented"
+  exit
   ln -s ${AVOG2S}/bin/webscripts/plot_tloss2d.m plot_tloss2d
   echo "CALLING:  ./plot_tloss2d"
   ./plot_tloss2d
@@ -292,22 +394,37 @@ if [[ "$MODELID" -eq 8 ]]  ; then    ## Model  8:  ModBB              (profile)
   exit
 fi
 if [[ "$MODELID" -eq 9 ]]  ; then    ## Model  9:  ModessRD1WCM       (profile)
-  echo "CALLING:  ${EXEC} --g2senvfile InfraAtmos01.env --atmosfileorder zuvwtdp --skiplines 0 --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --receiverheight_km 0 --maxheight_km 180 --maxrange_km 1000 --write_2D_TLoss"
-  ${EXEC} --g2senvfile InfraAtmos01.env --atmosfileorder zuvwtdp --skiplines 0 --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --receiverheight_km 0 --maxheight_km 180 --maxrange_km 1000 --write_2D_TLoss
-  ln -s ${AVOG2S}/bin/webscripts/plot_tloss2d.m plot_tloss2d
-  echo "CALLING:  ./plot_tloss2d"
-  ./plot_tloss2d
+  # Old version format
+  echo " ModessRD1WCM not yet implemented"
+  exit
+  #echo "CALLING:  ${EXEC} --g2senvfile InfraAtmos01.env --atmosfileorder zuvwtdp --skiplines 0 --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --receiverheight_km 0 --maxheight_km 180 --maxrange_km 1000 --write_2d_tloss"
+  #${EXEC} --g2senvfile InfraAtmos01.env --atmosfileorder zuvwtdp --skiplines 0 --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --receiverheight_km 0 --maxheight_km 180 --maxrange_km 1000 --write_2d_tloss
+  #ln -s ${AVOG2S}/bin/webscripts/plot_tloss2d.m plot_tloss2d
+  #echo "CALLING:  ./plot_tloss2d"
+  #./plot_tloss2d
 fi
 if [[ "$MODELID" -eq 10 ]] ; then    ## Model 10:  pape               (profile)
-  echo "CALLING:  ${EXEC} --g2senvfile InfraAtmos01.env --atmosfileorder zuvwtdp --skiplines 0 --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --receiverheight_km 0 --maxheight_km 180 --starter_type gaussian --n_pade 6 --maxrange_km 1000 --write_2D_TLoss --do_lossless"
-  ${EXEC} --g2senvfile InfraAtmos01.env --atmosfileorder zuvwtdp --skiplines 0 --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --receiverheight_km 0 --maxheight_km 180 --starter_type gaussian --n_pade 6 --maxrange_km 1000 --write_2D_TLoss --do_lossless
+  # Old version format
+  #echo "CALLING:  ${EXEC} --g2senvfile InfraAtmos01.env --atmosfileorder zuvwtdp --skiplines 0 --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --receiverheight_km 0 --maxheight_km 180 --starter_type gaussian --n_pade 6 --maxrange_km 1000 --write_2d_tloss --do_lossless"
+  #${EXEC} --g2senvfile InfraAtmos01.env --atmosfileorder zuvwtdp --skiplines 0 --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --receiverheight_km 0 --maxheight_km 180 --starter_type gaussian --n_pade 6 --maxrange_km 1000 --write_2d_tloss --do_lossless
+  # ncpaprop-release (current)
+  echo " ePape not yet implemented"
+  exit
+  echo "CALLING:  ${EXEC} --g2senvfile InfraAtmos01.env --atmosfileorder zuvwtdp --skiplines 0 --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --receiverheight_km 0 --maxheight_km 180 --starter_type gaussian --n_pade 6 --maxrange_km 1000 --write_2d_tloss --do_lossless"
+  #${EXEC} --atmosfile2d InfraAtmos01.env --atmosfileorder zuvwtdp --skiplines 0 --azimuth ${AZ1} --freq ${FREQ} --sourceheight_km ${SRCZ} --receiverheight_km 0 --maxheight_km 180 --starter_type gaussian --n_pade 6 --maxrange_km 1000 --write_2d_tloss --do_lossless
+
   ln -s ${AVOG2S}/bin/webscripts/plot_tloss2d.m plot_tloss2d
   echo "CALLING:  ./plot_tloss2d"
   ./plot_tloss2d
 fi
 if [[ "$MODELID" -eq 11 ]] ; then    ## Model 11:  Modess             (sweep)
-  echo "CALLING:  ${EXEC} --atmosfile Volc0.met --atmosfileorder ztuvdp --skiplines 0 --freq ${FREQ} --Nby2Dprop --azimuth_start 0 --azimuth_end 360 --azimuth_step 1 --write_2D_TLoss --sourceheight_km ${SRCZ}"
-  ${EXEC} --atmosfile Volc0.met --atmosfileorder ztuvdp --skiplines 0 --freq ${FREQ} --Nby2Dprop --azimuth_start 0 --azimuth_end 360 --azimuth_step 1 --write_2D_TLoss --sourceheight_km ${SRCZ}
+  # Old version format
+  #echo "CALLING:  ${EXEC} --atmosfile Volc0.met --atmosfileorder ztuvdp --skiplines 0 --freq ${FREQ} --Nby2Dprop --azimuth_start 0 --azimuth_end 360 --azimuth_step 1 --write_2d_tloss --sourceheight_km ${SRCZ}"
+  #${EXEC} --atmosfile Volc0.met --atmosfileorder ztuvdp --skiplines 0 --freq ${FREQ} --Nby2Dprop --azimuth_start 0 --azimuth_end 360 --azimuth_step 1 --write_2d_tloss --sourceheight_km ${SRCZ}
+  # ncpaprop-release (current)
+  echo "CALLING:  ${EXEC} --atmosfile Volc0.dat --multiprop --freq ${FREQ} --azimuth_start 0 --azimuth_end 360 --azimuth_step 1 --write_2d_tloss --sourceheight_km ${SRCZ}"
+  ${EXEC} --atmosfile Volc0.dat --multiprop --freq ${FREQ} --azimuth_start 0 --azimuth_end 360 --azimuth_step 1 --write_2d_tloss --sourceheight_km ${SRCZ}
+
   ln -s ${AVOG2S}/bin/webscripts/plot_Nby2D_tloss.py temp.py
   echo "CALLING:   python temp.py"
   python temp.py
