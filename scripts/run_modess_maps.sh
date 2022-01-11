@@ -2,7 +2,7 @@
 
 rc=0
 
-echo "run_volcs.sh:  checking input arguments"
+echo "run_modess_maps.sh:  checking input arguments"
 if [ -z $1 ]
 then
   echo "Error: Insufficient command-line arguments"
