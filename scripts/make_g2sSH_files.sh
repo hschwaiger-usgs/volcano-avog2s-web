@@ -37,7 +37,7 @@ WINDROOT="/data/WindFiles"
 WWW="/data/www/vsc-ash.wr.usgs.gov/G2S"
 
 AVOG2S=${INSTALLDIR}/AVOG2S
-SHROOT={$WINDROOT}/g2s_SH
+SHROOT={$WINDROOT}/AVOG2S
 RAWROOT={$SHROOT}/RAW_SH
 
 #WRK=/home/ash3d/G2S_today
@@ -66,36 +66,6 @@ else
   YYYYMMDD=${YYYY}${MM}${DD}
   HHr=${HH}".0"
 fi
-
-#if [[ "$FC" -eq 0 ]] ; then
-# FChour="00"
-# FChourR="0.0"
-#fi
-#if [[ "$FC" -eq 6 ]] ; then
-# FChour="06"
-# FChourR="6.0"
-#fi
-#if [[ "$FC" -eq 12 ]] ; then
-# FChour="12"
-# FChourR="12.0"
-#fi
-#if [[ "$FC" -eq 18 ]] ; then
-# FChour="18"
-# FChourR="18.0"
-#fi
-#if [[ "$FC" -eq 24 ]] ; then
-# FChour="24"
-# FChourR="24.0"
-#fi
-#if [[ "$FC" -eq 30 ]] ; then
-# FChour="30"
-# FChourR="30.0"
-#fi
-#
-#YYYY=`date  +%Y`
-#MM=`date  +%m`
-#DD=`date  +%d`
-#YYYYMMDD=${YYYY}${MM}${DD}
 
 cd ${WRK}
 

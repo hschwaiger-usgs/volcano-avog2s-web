@@ -42,7 +42,7 @@ if [ $# -ne 2 ]
   echo "Error: Incorrect number of command-line arguments"
   echo "Usage: autorun_gfs.sh Resolution FCpackage"
   echo "       where Resolution = 1p00, 0p50, or 0p25"
-  echo "             FCpackage  = 0, 6, 12, 18 or 24"
+  echo "             FCpackage  = 0, 6, 12, or 18"
   exit
 fi
 
@@ -81,10 +81,6 @@ case ${FC} in
  18)
   FChour="18"
   FChourR="18.0"
-  ;;
- 24)
-  FChour="24"
-  FChourR="24.0"
   ;;
  *)
   echo "GFS forecast package not recognized"
