@@ -44,9 +44,9 @@
 #  11) azimuth increment        (real valued in degrees)
 #  12) model ID                 (integer)
 #         ID = 1 : Art2d              (profile)
-#         ID = 2 : GeoAcGlobal        (profile)
-#         ID = 3 : GeoAcGlobal.RngDep (profile)
-#         ID = 4 : GeoAcGlobal.RngDep (sweep)
+#         ID = 2 : infraga-sph        (profile)
+#         ID = 3 : infraga-sph-rngdep (profile)
+#         ID = 4 : infraga-sph-rngdep (sweep)
 #         ID = 5 : Modess (strat.)    (profile)
 #         ID = 6 : CModess (strat.)   (profile)
 #         ID = 7 : WMod (strat.)      (profile)
@@ -77,17 +77,24 @@ AVOG2Suser=ash3d
 AVOG2S=/opt/USGS/AVOG2S
 WRK=${AVOG2S}/wrk
 ART2DDIR=/home/${AVOG2Suser}/Programs/Other/ART2D
-GEOACDIR=/home/${AVOG2Suser}/Programs/GIT/GeoAc
+GEOACDIR=/home/${AVOG2Suser}/Programs/GIT/infraGA/bin
 NCPADIR=/home/${AVOG2Suser}/Programs/GIT/ncpaprop/bin
 PYDIR=/home/${AVOG2Suser}/anaconda3/bin
 TOPO=/opt/USGS/data/Topo/etopo.nc
 DATA=/data/WindFiles/AVOG2S
 
 rc=0
+echo "---------------------------------------------------------------"
+echo "  run_InfraTool.sh"
+echo "   Standardized interface to Art2d, infraGA, and ncpaprop tools."
+echo "---------------------------------------------------------------"
+
 echo "checking input arguments"
 if [ -z ${1} ]
 then
-  echo "Error: You must specify a directory name (no spaces)"
+  echo "Error: No command-line areguments detected."
+  echo "Usage: run_InfraTool.sh work_dir YYYY MM DD HH Srcx Srcy Srcz Az1 Az2 delAz ModelID Range Freq Volc"
+  echo "  run_InfraTool.sh tmpClev 2021 12 03 00 190.055 52.8222 1.7 41 50 1 11 850.0 0.1 Cleveland"
   exit 1
 fi
 if [ -z $2 ]
@@ -177,50 +184,82 @@ RNG=${13}       # km (0 < rng < 1000)
 FREQ=${14}      # Hz (0.1 < freq < 2.0)
 SRCNAME=${15}   # No spaces
 
+echo "Command-line arguments successfully read"
+echo "   working directory = ${TMPDIR}"
+echo "   YYYY              = ${YYYY}"
+echo "   MM                = ${MM}"
+echo "   DD                = ${DD}"
+echo "   HH                = ${HH}"
+echo "   Source long       = ${SRCX}"
+echo "   Source lat.       = ${SRCY}"
+echo "   Source alt.       = ${SRCZ}"
+echo "   Start Azim.       = ${AZ1}"
+echo "   End Azim.         = ${AZ2}"
+echo "   Azim. step        = ${DAZ}"
+echo "   Model ID          = ${MODELID}"
+echo "   Range             = ${RNG}"
+echo "   Freq.             = ${FREQ}"
+echo "   Source name       = ${SRCNAME}"
+
+echo "---------------------------------------------------------------"
+echo " Creating work directory ${WRK}/${TMPDIR}"
+echo "---------------------------------------------------------------"
+
 mkdir -p ${WRK}/${TMPDIR}
 cd ${WRK}/${TMPDIR}
 
 if [[ "$MODELID" -eq 1 ]]  ; then    ## Model  1:  Art2d              (profile)
+  echo "Model 1 selected (Art2d): 2d transect along $AZ1"
   DIM=2
   EXEC=${ART2DDIR}/art2d
 fi
-if [[ "$MODELID" -eq 2 ]]  ; then    ## Model  2:  GeoAcGlobal        (profile)
+if [[ "$MODELID" -eq 2 ]]  ; then    ## Model  2:  infraga-sph        (profile)
+  echo "Model 2 selected (infraga-sph): 1d stratified transect along $AZ1"
   DIM=1
-  EXEC=${GEOACDIR}/GeoAcGlobal
+  EXEC=${GEOACDIR}/infraga-sph
 fi
-if [[ "$MODELID" -eq 3 ]]  ; then    ## Model  3:  GeoAcGlobal.RngDep (profile)
+if [[ "$MODELID" -eq 3 ]]  ; then    ## Model  3:  infraga-sph-rngdep (profile)
+  echo "Model 3 selected (infraga-sph-rngdep): 2d profile transect along $AZ1"
   DIM=3
-  EXEC=${GEOACDIR}/GeoAcGlobal.RngDep
+  EXEC=${GEOACDIR}/infraga-sph-rngdep
 fi
-if [[ "$MODELID" -eq 4 ]]  ; then    ## Model  4:  GeoAcGlobal.RngDep (sweep)
+if [[ "$MODELID" -eq 4 ]]  ; then    ## Model  4:  infraga-sph-rngdep (sweep)
+  echo "Model 4 selected (infraga-sph-rngdep sweep): 2d profile transects along $AZ1 to $AZ2 with a step of $DAZ"
   DIM=3
-  EXEC=${GEOACDIR}/GeoAcGlobal.RngDep
+  EXEC=${GEOACDIR}/infraga-sph-rngdep
 fi
 if [[ "$MODELID" -eq 5 ]]  ; then    ## Model  5:  Modess (strat.)    (profile)
+  echo "Model 5 selected (Modess): 1d stratified transect along $AZ1"
   DIM=1
   EXEC=${NCPADIR}/Modess
 fi
 if [[ "$MODELID" -eq 6 ]]  ; then    ## Model  6:  CModess (stra.)    (profile)
+  echo "Model 6 selected (CModess): 1d stratified transect along $AZ1"
   DIM=1
   EXEC=${NCPADIR}/CModess
 fi
 if [[ "$MODELID" -eq 7 ]]  ; then    ## Model  7:  WMod (stra.)       (profile)
+  echo "Model 7 selected (WMod): 1d stratified transect along $AZ1"
   DIM=1
   EXEC=${NCPADIR}/WMod
 fi
 if [[ "$MODELID" -eq 8 ]]  ; then    ## Model  8:  ModBB              (profile)
+  echo "Model 8 selected (ModDD): 1d stratified transect along $AZ1"
   DIM=1
   EXEC=${NCPADIR}/ModBB
 fi
 if [[ "$MODELID" -eq 9 ]]  ; then    ## Model  9:  ModessRD1WCM       (profile)
+  echo "Model 9 selected (ModessRD1WCM): 2d transect along $AZ1"
   DIM=2
   EXEC=${NCPADIR}/ModessRD1WCM
 fi
 if [[ "$MODELID" -eq 10 ]] ; then    ## Model 10:  pape               (profile)
+  echo "Model 10 selected (pape): 2d transect along $AZ1"
   DIM=2
   EXEC=${NCPADIR}/pape
 fi
 if [[ "$MODELID" -eq 11 ]] ; then    ## Model 11:  Modess             (sweep)
+  echo "Model 11 selected (Modess sweep): 2d profile transects along $AZ1 to $AZ2 with a step of $DAZ"
   DIM=1
   EXEC=${NCPADIR}/Modess
   PATH=$PYDIR:$PATH
@@ -263,10 +302,12 @@ echo "${SRCNAME}" > ${WRK}/${TMPDIR}/srcname.dat
 echo "${LONPMIN}" > ${WRK}/${TMPDIR}/lonpmin.dat
 echo "${LATPMIN}" > ${WRK}/${TMPDIR}/latpmin.dat
 
+echo "---------------------------------------------------------------"
+echo " Linking avo-g2s data files"
 ln -s ${DATA}/RAW_SH/G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_U_res.raw ${WRK}/${TMPDIR}/G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_U_res.raw
 ln -s ${DATA}/RAW_SH/G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_V_res.raw ${WRK}/${TMPDIR}/G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_V_res.raw
 ln -s ${DATA}/RAW_SH/G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_T_res.raw ${WRK}/${TMPDIR}/G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_T_res.raw
-
+echo " Generating atmospheric files"
 
 if [[ "$DIM" -eq 1 ]] ; then
   echo "${SRCX} ${SRCY}"                                  > ${WRK}/${TMPDIR}/temp.ctr
@@ -326,7 +367,8 @@ if [[ "$DIM" -eq 3 ]] ; then
   echo "Volc"                                            >> ${WRK}/${TMPDIR}/temp.ctr
   ${AVOG2S}/bin/g2s_Extract_Grid temp.ctr
 fi
-
+echo "---------------------------------------------------------------"
+echo "Now running the forward model"
 
 ####################################################################################
 ##  ART2D software (no public source found, legacy code)
@@ -335,16 +377,24 @@ if [[ "$MODELID" -eq 1 ]]  ; then    ## Model  1:  Art2d              (profile)
   exit
 fi
 ####################################################################################
-##  GeoAc software (https://github.com/LANL-Seismoacoustics/GeoAc)
-if [[ "$MODELID" -eq 2 ]]  ; then    ## Model  2:  GeoAcGlobal        (profile)                                       -180->180
+##  infraGA software (https://github.com/LANL-Seismoacoustics/infraGA)
+if [[ "$MODELID" -eq 2 ]]  ; then    ## Model  2:  infraga-sph        (profile)                                       -180->180
   echo "CALLING:   ${EXEC} -prop Volc0.met theta_min=-30.0 theta_max=55.0 theta_step=1.0 azimuth=${AZ1} bounces=10 lat_src=${SRCY} lon_src=${SRCX} z_src=${SRCZ} CalcAmp=False WriteAtmo=True"
-  ${EXEC} -prop Volc0.met theta_min=-30.0 theta_max=55.0 theta_step=1.0 azimuth=${AZ1} bounces=10 lat_src=${SRCY} lon_src=${SRCX} z_src=${SRCZ} CalcAmp=False WriteAtmo=True
+  INCLMIN=1.0
+  INCLMAX=55.0
+  INCLSTEP=1.0
+  NBOUNCES=10
+  echo ${INCLMIN}  > inclmin.dat
+  echo ${INCLMAX}  > inclmax.dat
+  echo ${INCLSTEP} > inclstep.dat
+  echo "CALLING:   ${EXEC} -prop Volc0.met incl_min=${INCLMIN} incl_max=${INCLMAX} incl_step=${INCLSTEP} azimuth=${AZ1} bounces=${NBOUNCES} src_lat=${SRCY} src_lon=${SRCX} src_alt=${SRCZ} write_atmo=True"
+  ${EXEC} -prop Volc0.met incl_min=${INCLMIN} incl_max=${INCLMAX} incl_step=${INCLSTEP} azimuth=${AZ1} bounces=${NBOUNCES} src_lat=${SRCY} src_lon=${SRCX} src_alt=${SRCZ} write_atmo=True
 fi
-if [[ "$MODELID" -eq 3 ]]  ; then    ## Model  3:  GeoAcGlobal.RngDep (profile)
+if [[ "$MODELID" -eq 3 ]]  ; then    ## Model  3:  infraga-sph-rngdep (profile)
   echo "CALLING:   ${EXEC} -prop Volc Volc.loclat Volc.loclon theta_min=0.0 theta_max=55.0 theta_step=1.0 azimuth=${AZ1} bounces=10 lat_src=${SRCY} lon_src=${SRCX} z_src=${SRCZ} CalcAmp=False WriteAtmo=True"
   ${EXEC} -prop Volc Volc.loclat Volc.loclon theta_min=0.0 theta_max=55.0 theta_step=1.0 azimuth=${AZ1} bounces=10 lat_src=${SRCY} lon_src=${SRCX} z_src=${SRCZ} CalcAmp=False WriteAtmo=True
 fi
-if [[ "$MODELID" -eq 4 ]]  ; then    ## Model  4:  GeoAcGlobal.RngDep (sweep)
+if [[ "$MODELID" -eq 4 ]]  ; then    ## Model  4:  infraga-sph-rngdep (sweep)
   echo "CALLING:  ${EXEC} -prop Volc Volc.loclat Volc.loclon theta_min=-30.0 theta_max=55.0 theta_step=1.0 phi_min=${AZ1} phi_max=${AZ2} phi_step=${DAZ} bounces=10 lat_src=${SRCY} lon_src=${SRCX} z_src=${SRCZ} CalcAmp=False WriteAtmo=True"
   ${EXEC} -prop Volc Volc.loclat Volc.loclon theta_min=-30.0 theta_max=55.0 theta_step=1.0 phi_min=${AZ1} phi_max=${AZ2} phi_step=${DAZ} bounces=10 lat_src=${SRCY} lon_src=${SRCX} z_src=${SRCZ} CalcAmp=False WriteAtmo=True
 fi

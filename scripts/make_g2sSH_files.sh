@@ -40,7 +40,6 @@ AVOG2S=${INSTALLDIR}/AVOG2S
 SHROOT={$WINDROOT}/AVOG2S
 RAWROOT={$SHROOT}/RAW_SH
 
-#WRK=/home/ash3d/G2S_today
 WRK=${AVOG2S}/wrk
 
 rc=0
@@ -53,7 +52,7 @@ then
   echo "        where YYYY = year"
   echo "                MM = month"
   echo "                DD = day of month"
-  echo "                HH = forecast hour from start of FC package"
+  echo "                HH = forecast hour (2-digit int) from start of FC package"
   echo "            FCpack = forecast package (00,06,12,18)"
   exit 1
 else
@@ -67,7 +66,9 @@ else
   HHr=${HH}".0"
 fi
 
-cd ${WRK}
+LOCWRK=${WRK}/${YYYMMDD}_${HH}
+mkdir -p $(LOCWRK}
+cd ${LOCWRK}
 
 HWMPATH=${AVOG2S}/ExternalData/HWM14
 export HWMPATH
@@ -77,38 +78,46 @@ gen_Res=${AVOG2S}/bin/g2s_ResampleAtmos
 
 rm -f Ap.dat F107.dat NGDC
 
-ln -s ${AVOG2S}/ExternalData/Ap_Forecast/NGDC_NOAA_Archive NGDC
-ln -s ${AVOG2S}/ExternalData/Ap_Forecast/Ap.dat
-ln -s ${AVOG2S}/ExternalData/Ap_Forecast/F107.dat
-ln -s ${WINDROOT}/gfs/gfs.${YYYYMMDD}${FC}/gfs.t${FC}z.pgrb2.0p50.f0${HH} ${YYYYMMDD}${FC}.f0${HH}.grib2
+ln -s ${AVOG2S}/ExternalData/Ap_Forecast/NGDC_NOAA_Archive   ${LOCWRK}/NGDC
+ln -s ${AVOG2S}/ExternalData/Ap_Forecast/Ap.dat              ${LOCWRK}/Ap.dat
+ln -s ${AVOG2S}/ExternalData/Ap_Forecast/F107.dat            ${LOCWRK}/F107.dat
+ln -s ${WINDROOT}/gfs/gfs.${YYYYMMDD}${FC}/gfs.t${FC}z.pgrb2.0p50.f0${HH}   ${LOCWRK}/${YYYYMMDD}${FC}.f0${HH}.grib2
 
-outfile=G2S_SH_${YYYYMMDD}_${HH}Z_wf20.nc
+outroot=G2S_SH_${YYYYMMDD}_${HH}Z_wf20
+outnc=${outroot}.nc
 
 CTR="tmpSH_${HH}.ctr"
 
-echo "${YYYY} ${MM} ${DD} ${HHr}"                          >  ${CTR}
+echo "${YYYY} ${MM} ${DD} ${HHr}"                          > ${CTR}
 echo "1 4 -107.0 50.0 50.0 50.0 6367.470"                 >> ${CTR}
 echo "0.5 120 "                                           >> ${CTR}
-echo "35 200 2.5"                                         >> ${CTR}
+echo "55 200 2.5"                                         >> ${CTR}
 echo "1"                                                  >> ${CTR}
 echo "20 1 4 3"                                           >> ${CTR}
-echo "0.0 40.0 1.0"                                       >> ${CTR}
+echo "0.0 60.0 1.0"                                       >> ${CTR}
 echo "${YYYYMMDD}${FC}.f0${HH}.grib2"                     >> ${CTR}
 echo "Ap.dat"                                             >> ${CTR}
 echo "F107.dat"                                           >> ${CTR}
-echo "${outfile}"                                         >> ${CTR}
+echo "${outnc}"                                           >> ${CTR}
 
-# Calculate the coefficient file
+# Calculate the coefficient file; gennerating $outnc}
 ${gen_SC} ${CTR}
-# copy file to the public website
-cp -a ${outfile} ${WWW}/${outfile}
-mv ${outfile} ${SHROOT}/${outfile}
-# Now generate the reconstituted *.raw files
-${gen_Res} ${outfile}
-mv G2S_SH_${YYYYMMDD}_${FChour}Z_wf20*raw ${RAWROOT}
 
-#rm NGDC
-#rm Ap.dat
-#rm F107.dat
-#rm ${YYYYMMDD}${FC}.f0${HH}.grib2
-#rm tmpSH_${HH}.ctr
+# Now generate the reconstituted *.raw files
+${gen_Res} ${outnc}
+mv ${outroot}_T_res.raw ${RAWROOT}/${outroot}_T_res.raw
+mv ${outroot}_U_res.raw ${RAWROOT}/${outroot}_U_res.raw
+mv ${outroot}_V_res.raw ${RAWROOT}/${outroot}_V_res.raw
+
+# copy file to the public website and archive location
+cp -a ${outnc} ${WWW}/${outnc}
+mv ${outnc} ${SHROOT}/${outnc}
+
+#clean up the working directory
+rm ${LOCWRK}/NGDC
+rm ${LOCWRK}/Ap.dat
+rm ${LOCWRK}/F107.dat
+rm ${LOCWRK}/${YYYYMMDD}${FC}.f0${HH}.grib2
+rm ${LOCWRK}/tmpSH_${HH}.ctr
+
+
