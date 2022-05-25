@@ -162,14 +162,14 @@ install:
 	install -d $(INSTALLDIR)/wrk
 	install -d $(INSTALLDIR)/share
 	install -m 755 bin/getAzRng                         $(INSTALLDIR)/bin/getAzRng
-	install -m 755 webscripts/run_InfraTool_Web.sh      $(INSTALLDIR)/bin/webscripts/run_InfraTool_Web.sh
+	install -m 755 webscripts/run_InfraTool.sh          $(INSTALLDIR)/bin/webscripts/run_InfraTool.sh
 	install -m 755 webscripts/plot_Nby2D_tloss.py       $(INSTALLDIR)/bin/webscripts/plot_Nby2D_tloss.py
 	install -m 755 webscripts/plot_tloss2d.m            $(INSTALLDIR)/bin/webscripts/plot_tloss2d.m
 	install -m 755 scripts/autorun_avog2s_gfs.sh        $(INSTALLDIR)/bin/scripts/autorun_avog2s_gfs.sh
 	install -m 755 scripts/make_g2sFC_files.sh          $(INSTALLDIR)/bin/scripts/make_g2sFC_files.sh
 	install -m 755 scripts/autorun_avog2s_nam.sh        $(INSTALLDIR)/bin/scripts/autorun_avog2s_nam.sh
 	install -m 755 scripts/make_g2sSH_files.sh          $(INSTALLDIR)/bin/scripts/make_g2sSH_files.sh
-	install -m 755 webscripts/run_ModessMap_volcs.sh    $(INSTALLDIR)/bin/webscripts/run_ModessMap_volcs.sh
+	install -m 755 scripts/run_ModessMap_volcs.sh       $(INSTALLDIR)/bin/scripts/run_ModessMap_volcs.sh
 	install -m 755 share/ModMap_Volcs.txt               $(INSTALLDIR)/share/ModMap_Volcs.txt
 
 #uninstall:
