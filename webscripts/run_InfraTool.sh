@@ -72,7 +72,7 @@
 #
 ###############################################################################
 
-AVOG2Suser=ash3d
+AVOG2Suser=avog2s
 
 AVOG2S=/opt/USGS/AVOG2S
 WRK=${AVOG2S}/wrk

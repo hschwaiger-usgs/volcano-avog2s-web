@@ -5,6 +5,6 @@ WRK=${AVOG2S}/wrk
 
 GFS_retain=3
 
-find ${WRK}/2021*nc -type f -mtime +${GFS_retain} -exec rm '{}' \;
+find ${WRK}/2024*nc -type f -mtime +${GFS_retain} -exec rm '{}' \;
 
 

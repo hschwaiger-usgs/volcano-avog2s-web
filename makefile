@@ -28,24 +28,23 @@
 #      technical support to users of this software.
 #
 #      Sequence of commands:
-#      "make"  compiles the Ash3d executable
+#      "make"  compiles the fortran executables
 #      "make all" builds the executables and copies to bin
 #      "make install" copies the contents of branches/core_code/bin to the install location
-#                        e.g. /opt/USGS/Ash3d
+#                        e.g. /opt/USGS/AVOG2S
 #
 #  SYSTEM specifies which compiler to use
 #    Current available options are:
-#      gfortran , ifort
+#      gfortran
 #    This variable cannot be left blank
 SYSTEM = gfortran
+SYSINC = make_$(SYSTEM).inc
 #
 #  RUN specifies which collection of compilation flags that should be run
 #    Current available options are:
 #      DEBUG : includes debugging info and issues warnings
 #      PROF  : includes profiling flags with some optimization
 #      OPT   : includes optimizations flags for fastest runtime
-#      OMPOPT: includes optimizations flags for fastest runtime and OpenMP directives
-#              To run, enter: env OMP_NUM_THREADS=4 Ash3d input_file.inp
 #    This variable cannot be left blank
 RUN = OPT
 
@@ -60,90 +59,13 @@ INSTALLDIR=/opt/USGS/AVOG2S
 ###############################################################################
 
 
+###############################################################################
+# Import the compiler-specific include file.  Currently one of:
+#  GNU Fortran Compiler
+include $(SYSINC)
+###############################################################################
 
 ###############################################################################
-###############################################################################
-
-
-###############################################################################
-##########  GNU Fortran Compiler  #############################################
-ifeq ($(SYSTEM), gfortran)
-
-    FCHOME=/usr
-    FC=/usr/bin/gfortran
-
-    COMPINC = -I$(FCHOME)/include -I$(FCHOME)/lib64/gfortran/modules
-    COMPLIBS = -L$(FCHOME)/lib -L$(FCHOME)/lib64
-
-    LIBS = $(COMPLIBS) $(USGSLIBDIR) $(USGSINC) $(COMPINC) $(USGSLIB) $(DATALIBS)
-
-# Debugging flags
-ifeq ($(RUN), DEBUG)
-    FFLAGS =  -O0 -g3 -Wall -fbounds-check -pedantic -fbacktrace -fimplicit-none -Wunderflow -Wuninitialized -ffpe-trap=invalid,zero,overflow -fdefault-real-8
-    ASH3DEXEC=Ash3d_debug
-endif
-ifeq ($(RUN), DEBUGOMP)
-    FFLAGS =  -g3 -pg -Wall -fbounds-check -pedantic -fimplicit-none -Wunderflow -Wuninitialized -Wmaybe-uninitialized -ffpe-trap=invalid,zero,overflow -fdefault-real-8 -fopenmp -lgomp
-    ASH3DEXEC=Ash3d_debugOMP
-endif
-# Profiling flags
-ifeq ($(RUN), PROF)
-    FFLAGS = -g -pg -w -fno-math-errno -funsafe-math-optimizations -fno-trapping-math -fno-signaling-nans -fcx-limited-range -fno-rounding-math -fdefault-real-8
-    ASH3DEXEC=Ash3d_prof
-endif
-# Production run flags
-ifeq ($(RUN), OPT)
-    FFLAGS = -O3 -w -fno-math-errno -funsafe-math-optimizations -fno-trapping-math -fno-signaling-nans -fcx-limited-range -fno-rounding-math -fdefault-real-8
-    ASH3DEXEC=Ash3d
-endif
-ifeq ($(RUN), OMPOPT)
-    FFLAGS = -O3 -w -ffast-math -fdefault-real-8 -fopenmp -lgomp
-    ASH3DEXEC=Ash3d_omp
-endif
-
-      # Preprocessing flags
-    FPPFLAGS =  -x f95-cpp-input $(VERBFPPFLAG)
-      # Extra flags
-    #EXFLAGS = -xf95
-    EXFLAGS =
-endif
-###############################################################################
-##########  Intel Fortran Compiler  #############################################
-ifeq ($(SYSTEM), ifort)
-    FCHOME = $(HOME)/intel
-    FC = $(FCHOME)/bin/ifort
-    COMPLIBS = -L$(FCHOME)/lib
-    COMPINC = -I$(FCHOME)/include
-    LIBS = $(COMPLIBS) $(DATALIBS) $(PROJLIBS) $(COMPINC) -llapack -lblas -lirc -limf
-# Debugging flags
-ifeq ($(RUN), DEBUG)
-    FFLAGS = -g2 -pg -warn all -check all -real-size 64 -check uninit -traceback
-    ASH3DEXEC=Ash3d_debug
-endif
-ifeq ($(RUN), DEBUGOMP)
-    FFLAGS = -g2 -pg -warn all -check all -real-size 64 -check uninit -openmp
-    ASH3DEXEC=Ash3d_debugOMP
-endif
-# Profiling flags
-ifeq ($(RUN), PROF)
-    FFLAGS = -g2 -pg
-    ASH3DEXEC=Ash3d_prof
-endif
-# Production run flags
-ifeq ($(RUN), OPT)
-    FFLAGS = -O3 -ftz -w -ipo
-    ASH3DEXEC=Ash3d
-endif
-ifeq ($(RUN), OMPOPT)
-    FFLAGS = -O3 -ftz -w -ipo -openmp
-    ASH3DEXEC=Ash3d_omp
-endif
-
-      # Preprocessing flags
-    FPPFLAGS =  -fpp -Qoption,fpp $(VERBFPPFLAG) 
-      # Extra flags
-    EXFLAGS =
-endif
 ###############################################################################
 
 all: misc_scripts/getAzRng
@@ -165,11 +87,11 @@ install:
 	install -m 755 webscripts/run_InfraTool.sh          $(INSTALLDIR)/bin/webscripts/run_InfraTool.sh
 	install -m 755 webscripts/plot_Nby2D_tloss.py       $(INSTALLDIR)/bin/webscripts/plot_Nby2D_tloss.py
 	install -m 755 webscripts/plot_tloss2d.m            $(INSTALLDIR)/bin/webscripts/plot_tloss2d.m
+	install -m 755 webscripts/run_ModessMap_volcs.sh    $(INSTALLDIR)/bin/webscripts/run_ModessMap_volcs.sh
 	install -m 755 scripts/autorun_avog2s_gfs.sh        $(INSTALLDIR)/bin/scripts/autorun_avog2s_gfs.sh
 	install -m 755 scripts/make_g2sFC_files.sh          $(INSTALLDIR)/bin/scripts/make_g2sFC_files.sh
 	install -m 755 scripts/autorun_avog2s_nam.sh        $(INSTALLDIR)/bin/scripts/autorun_avog2s_nam.sh
 	install -m 755 scripts/make_g2sSH_files.sh          $(INSTALLDIR)/bin/scripts/make_g2sSH_files.sh
-	install -m 755 scripts/run_ModessMap_volcs.sh       $(INSTALLDIR)/bin/scripts/run_ModessMap_volcs.sh
 	install -m 755 share/ModMap_Volcs.txt               $(INSTALLDIR)/share/ModMap_Volcs.txt
 
 #uninstall:

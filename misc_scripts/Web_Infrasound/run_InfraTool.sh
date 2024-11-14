@@ -1,22 +1,16 @@
 #!/bin/bash
 
+AVOG2Suser=avog2s
 
 AVOG2S=/opt/USGS/AVOG2S
 WRK=${AVOG2S}/wrk
-ART2DDIR=/home/ash3d/Programs/Other/ART2D
-GEOACDIR=/home/ash3d/Programs/GIT/GeoAc
-NCPADIR=/home/ash3d/Programs/GIT/ncpaprop/bin
-PYDIR=/home/ash3d/anaconda3/bin
-TOPO=/opt/USGS/data/Topo/etopo.nc
+ART2DDIR=/home/${AVOG2Suser}/Programs/Other/ART2D
+GEOACDIR=/home/${AVOG2Suser}/Programs/GIT/GeoAc
+NCPADIR=/home/${AVOG2Suser}/Programs/GIT/ncpaprop/bin
+PYDIR=/home/${AVOG2Suser}/anaconda3/bin
+TOPO=/data/topo/etopo.nc
 DATA=/data/WindFiles/AVOG2S
-
-#WRK=/media/hschwaiger/6249f4be-4861-4a90-95ea-743a7e0a0579/Infrasound/BV_runs/Autoplotting/
-#AVOG2S=/opt/USGS/AVOG2S
-#ART2DDIR=/home/hschwaiger/work/USGS/Ground2Space/ART2D/bin
-#GEOACDIR=/home/hschwaiger/Programs/GIT/GeoAc-master/
-#NCPADIR=/home/hschwaiger/work/USGS/Software_repos/GIT/ncpaprop/bin
-#PYDIR=/home/hschwaiger/anaconda3/bin
-#TOPO=/data/TOPO/ETOPO1/ETOPO1_Ice_c_gmt4.nc
+#HTTP=/var/www/html/...
 
 rc=0
 echo "checking input arguments"
@@ -204,7 +198,6 @@ echo "${LONPMIN}" > lonpmin.dat
 echo "${LATPMIN}" > latpmin.dat
 
 ln -s ${WRK}/RAW_SH/G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_*_res.raw .
-#ln -s /opt/Ash3d/data/topo/etopo.nc .
 
 if [[ "$DIM" -eq 1 ]] ; then
   echo "${SRCX} ${SRCY}"                                  > temp.ctr
@@ -309,7 +302,7 @@ if [[ "$MODELID" -eq 11 ]] ; then    ## Model 11:  Modess             (sweep)
 fi
 
 mv temp.png ${WRK}/Web_Infrasound/temp.png
-#cp *.png /webdata/int-vsc-ash.wr.usgs.gov/htdocs/G2S_Modess/
+#cp *.png ${HTTP}
 
 rm ${TMP}/*.dat ${TMP}/temp.* ${TMP}/G2S_SH_${YYYY}${MM}${DD}_${HH}Z_wf20_*_res.raw
 cd ${WRK}/Web_Infrasound

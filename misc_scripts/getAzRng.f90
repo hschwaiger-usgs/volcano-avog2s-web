@@ -1,4 +1,10 @@
 !##############################################################################
+!
+!  getAzRng is a command-line tool for calculating the azimuth and range from
+!  one point on the Earth to another. Usage is:
+!    ./getAzRng Pt1_lon Pt1_lat Pt2_lon Pt2_lat
+!  Output the azimuth (in radians) and range (in km) in format '(2f15.4)'
+!
 !##############################################################################
       program getAzRng
 

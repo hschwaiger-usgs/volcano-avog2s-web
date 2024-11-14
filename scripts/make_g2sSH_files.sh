@@ -34,7 +34,7 @@
 
 INSTALLDIR="/opt/USGS"
 WINDROOT="/data/WindFiles"
-WWW="/data/www/vsc-ash.wr.usgs.gov/G2S"
+#HTTP="/var/www/html/G2S"
 
 AVOG2S=${INSTALLDIR}/AVOG2S
 SHROOT={$WINDROOT}/AVOG2S

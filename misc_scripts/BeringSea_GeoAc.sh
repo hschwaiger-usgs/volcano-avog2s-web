@@ -1,13 +1,16 @@
 #!/bin/bash
 
+# Set the location where maps should be copied
+#HTTP=/var/www/html/...
+
 rc=0
 
-echo "BeringSea_GeoAc.sh:  checking input arguments"
+echo "Map_GeoAc.sh:  checking input arguments"
 if [ -z $1 ]
 then
   echo "Error: Insufficient command-line arguments"
-  echo "Usage:  BeringSea_GeoAc.sh YYYY MM DD FChour"
-  echo "   e.g. BeringSea_GeoAc.sh 2018 03 09 12"
+  echo "Usage:  Map_GeoAc.sh YYYY MM DD FChour"
+  echo "   e.g. Map_GeoAc.sh 2018 03 09 12"
   exit 1
 else
   YYYY=$1
@@ -16,8 +19,8 @@ fi
 if [ -z $2 ]
 then
   echo "Error: Insufficient command-line arguments"
-  echo "Usage:  BeringSea_GeoAc.sh YYYY MM DD FChour"
-  echo "   e.g. BeringSea_GeoAc.sh 2018 03 09 12"
+  echo "Usage:  Map_GeoAc.sh YYYY MM DD FChour"
+  echo "   e.g. Map_GeoAc.sh 2018 03 09 12"
   exit 1
 else
   MM=$2
@@ -26,8 +29,8 @@ fi
 if [ -z $3 ]
 then
   echo "Error: Insufficient command-line arguments"
-  echo "Usage:  BeringSea_GeoAc.sh YYYY MM DD FChour"
-  echo "   e.g. BeringSea_GeoAc.sh 2018 03 09 12"
+  echo "Usage:  Map_GeoAc.sh YYYY MM DD FChour"
+  echo "   e.g. Map_GeoAc.sh 2018 03 09 12"
   exit 1
 else
   DD=$3
@@ -36,8 +39,8 @@ fi
 if [ -z $4 ]
 then
   echo "Error: Insufficient command-line arguments"
-  echo "Usage:  BeringSea_GeoAc.sh YYYY MM DD FChour"
-  echo "   e.g. BeringSea_GeoAc.sh 2018 03 09 12"
+  echo "Usage:  Map_GeoAc.sh YYYY MM DD FChour"
+  echo "   e.g. Map_GeoAc.sh 2018 03 09 12"
   exit 1
 else
   FChour=$4
@@ -61,6 +64,7 @@ GMTrgr=("-" "-" "-" "-" "grdreformat" "grdconvert")
 
 mapscale="6i"
 
+# Example coordinates used for the Bering Sea
 lonw=183.0
 lats=51.0
 lone=202.0
@@ -76,7 +80,22 @@ COASTp="-Ggrey90 -W -Slightsteelblue1"
 zmin=0.0
 zmax=3600.0
 dz=25.0
-cpt=/home/ash3d/G2S_today/GMT_seis.cpt
+cpt=GMT_seis.cpt
+### #       $Id: GMT_seis.cpt,v 1.1.1.1 2000/12/28 01:23:45 gmt Exp $
+### #
+### # Colormap using in seismic tomographic images
+### # Designed by Suzan van der Lee
+### # COLOR_MODEL = RGB
+### -1.00	170	0	0	-.777	255	0	0
+### -.777	255	0	0	-.555	255	85	0
+### -.555	255	85	0	-.333	255	170	0
+### -.333	255	170	0	-.111	255	255	0
+### -.111	255	255	0	.111	255	255	0
+### .111	255	255	0	.333	90	255	30
+### .333	90	255	30	.555	0	240	110
+### .555	0	240	110	.777	0	80	255
+### .777	0	80	255	1.00	0	0	205
+
 makecpt -C${cpt} -T${zmin}/${zmax}/${dz} > tt.cpt
 
 ${GMTpre[GMTv]} pscoast $AREAp $PROJp $DETAILp $COASTp -K > temp.ps
@@ -120,4 +139,6 @@ cp  ${YYYYMMDD}/Bering_raypaths.dat raypaths.dat
 montage -tile 1x3 -geometry 750x250 DLL.png SnP.png Adk.png  temp2.png
 convert +append temp1.png temp2.png ${Volc}_${YYYYMMDD}_${FChour}_GeoAc.png
 
-cp ${Volc}_${YYYYMMDD}_${FChour}_GeoAc.png /webdata/int-vsc-ash.wr.usgs.gov/htdocs/G2S/
+# Now copy to web accessible site if you'd like
+#cp ${Volc}_${YYYYMMDD}_${FChour}_GeoAc.png ${HTTP}
+
